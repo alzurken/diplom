@@ -1,5 +1,6 @@
 package ru.mipt.sign.core.exceptions;
 
-public class NextCommandException extends Exception {
+public class NextCommandException extends NeuronException
+{
 
 }

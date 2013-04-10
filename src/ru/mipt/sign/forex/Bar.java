@@ -7,82 +7,82 @@ import java.util.List;
 
 public class Bar
 {
-	private Double open;
-	private Double close;
-	private Double high;
-	private Double low;
-	private Date timestamp;
+    private Double open;
+    private Double close;
+    private Double high;
+    private Double low;
+    private Date timestamp;
 
-	public Bar(Date date, Double open, Double close, Double low, Double high)
-	{
-		super();
-		timestamp = date;
-		this.open = open;
-		this.close = close;
-		this.high = high;
-		this.low = low;
-	}
+    public Bar(Date date, Double open, Double close, Double low, Double high)
+    {
+        super();
+        timestamp = date;
+        this.open = open;
+        this.close = close;
+        this.high = high;
+        this.low = low;
+    }
 
-	public Date getTimestamp()
-	{
-		return timestamp;
-	}
+    public Date getTimestamp()
+    {
+        return timestamp;
+    }
 
-	public Double getOpen()
-	{
-		return open;
-	}
+    public Double getOpen()
+    {
+        return open;
+    }
 
-	public Double getClose()
-	{
-		return close;
-	}
+    public Double getClose()
+    {
+        return close;
+    }
 
-	public Double getHigh()
-	{
-		return high;
-	}
+    public Double getHigh()
+    {
+        return high;
+    }
 
-	public Double getLow()
-	{
-		return low;
-	}
+    public Double getLow()
+    {
+        return low;
+    }
 
-	public Double minusOpen(Bar bar)
-	{
-		return (this.open - bar.open);
-	}
+    public Double minusOpen(Bar bar)
+    {
+        return (this.open - bar.open);
+    }
 
-	public Double minusClose(Bar bar)
-	{
-		return (this.close - bar.close);
-	}
+    public Double minusClose(Bar bar)
+    {
+        return (this.close - bar.close);
+    }
 
-	public Double minusLow(Bar bar)
-	{
-		return (this.low - bar.low);
-	}
+    public Double minusLow(Bar bar)
+    {
+        return (this.low - bar.low);
+    }
 
-	public Double minusHigh(Bar bar)
-	{
-		return (this.high - bar.high);
-	}
+    public Double minusHigh(Bar bar)
+    {
+        return (this.high - bar.high);
+    }
 
-	public List<Double> getList()
-	{
-		List<Double> bar = new ArrayList<Double>();
-		bar.add(open);
-		bar.add(close);
-		bar.add(high);
-		bar.add(low);
-		return bar;
-	}
+    public List<Double> getList()
+    {
+        List<Double> bar = new ArrayList<Double>();
+        bar.add(open);
+        bar.add(close);
+        bar.add(high);
+        bar.add(low);
+        return bar;
+    }
 
-	@Override
-	public String toString()
-	{
-		DecimalFormat dform = new DecimalFormat("###.0000");
-		return "Date: " + timestamp.toString() + " - O/C/H/L - " + dform.format(open) + "  " + dform.format(close) + "  " + dform.format(high) + "  "
-				+ dform.format(low);
-	}
+    @Override
+    public String toString()
+    {
+        DecimalFormat dform = new DecimalFormat("###.0000");
+        return "Date: " + timestamp.toString() + " - O/C/H/L - " + dform.format(open) + "  " + dform.format(close) + "  " + dform.format(high) + "  "
+                + dform.format(low);
+    }
 }

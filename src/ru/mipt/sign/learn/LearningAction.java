@@ -7,14 +7,22 @@ import ru.mipt.sign.neurons.NeuroNet;
 
 public abstract class LearningAction
 {
-	protected NeuroNet nn;
-	protected List rightValue;
+    protected NeuroNet nn;
+    protected List rightValue;
+    protected List result;
+    protected String message;
 
-	public LearningAction(NeuroNet nn, List rightValue)
-	{
-		this.nn = nn;
-		this.rightValue = rightValue;
-	}
+    public LearningAction(NeuroNet nn, List result, List rightValue)
+    {
+        this.nn = nn;
+        this.rightValue = rightValue;
+        this.result = result;
+    }
 
-	public abstract void perform() throws NeuronNotFound;
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public abstract void perform() throws NeuronNotFound;
 }

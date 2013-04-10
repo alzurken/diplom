@@ -5,9 +5,9 @@ import java.util.Vector;
 public interface INew
 {
 
-	public String getText();
+    public String getText();
 
-	public Double getAmplitude();
+    public Double getAmplitude();
 
-	public Vector<Double> getVector();
+    public Vector<Double> getVector();
 }
