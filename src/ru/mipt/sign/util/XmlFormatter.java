@@ -25,8 +25,7 @@ import org.xml.sax.SAXException;
 public class XmlFormatter
 {
 
-    public XmlFormatter()
-    {
+    public XmlFormatter() {
     }
 
     public static String format(String unformattedXml)

@@ -13,5 +13,5 @@ public class NeuronConst
     public static final Integer LEARNING_TYPE_1 = 1;
     public static final Integer LEARNING_TYPE_2 = 2;
     public static final Integer DEFAULT_FIBER_NUMBER = 4;
-    public static final BigInteger LAST_NEURON_ID = new BigInteger("1000000000");
+    public static final BigInteger LAST_NEURON_ID = new BigInteger("100000000000");
 }

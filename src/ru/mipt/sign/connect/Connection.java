@@ -1,12 +1,7 @@
 package ru.mipt.sign.connect;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jdom.DataConversionException;
 import org.jdom.Element;
@@ -22,6 +17,12 @@ public class Connection extends SObject
     private Neuron zNeuron;
     private Map<Integer, Integer> a2zMapping;
     private NeuroNet parent;
+    
+    public Map<Integer, Integer> getA2zMapping()
+    {
+        return a2zMapping;
+    }
+
 
     public Neuron getANeuron()
     {
@@ -48,13 +49,13 @@ public class Connection extends SObject
         return zNeuron.getID();
     }
 
-    public boolean chechASide(Integer start)
+    public boolean checkASide(Integer start)
     {
         Integer min = Collections.min(a2zMapping.keySet());
         return min >= start;
     }
 
-    public boolean chechZSide(Integer start)
+    public boolean checkZSide(Integer start)
     {
         Integer min = Collections.min(a2zMapping.values());
         return min >= start;
@@ -101,8 +102,7 @@ public class Connection extends SObject
         System.out.println("Disconnected neurons " + aNeuron.getID() + " and " + zNeuron.getID());
     }
 
-    public Connection(Element el, NeuroNet nn) throws NeuronNotFound
-    {
+    public Connection(Element el, NeuroNet nn) throws NeuronNotFound {
         super(el);
         parent = nn;
         Element connection = el;
@@ -129,8 +129,7 @@ public class Connection extends SObject
         }
     }
 
-    public Connection(BigInteger id, NeuroNet nn)
-    {
+    public Connection(BigInteger id, NeuroNet nn) {
         super(id);
         init();
         parent = nn;
@@ -166,7 +165,9 @@ public class Connection extends SObject
         aNeuron = parent.getNeuron(aNeuronID);
         aNeuron.addConnection(this);
         zNeuron = parent.getNeuron(zNeuronID);
-        List<Integer> aSide = aNeuron.getUnboundOutputs(fiber); // set output number resize neuron
+        List<Integer> aSide = aNeuron.getUnboundOutputs(fiber); // set output
+                                                                // number resize
+                                                                // neuron
         aNeuron.addOutputs(aSide);
         List<Integer> zSide = zNeuron.getUnboundInputs(fiber);
         zNeuron.addInputs(zSide);

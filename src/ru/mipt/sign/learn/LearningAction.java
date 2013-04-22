@@ -12,8 +12,7 @@ public abstract class LearningAction
     protected List result;
     protected String message;
 
-    public LearningAction(NeuroNet nn, List result, List rightValue)
-    {
+    public LearningAction(NeuroNet nn, List result, List rightValue) {
         this.nn = nn;
         this.rightValue = rightValue;
         this.result = result;

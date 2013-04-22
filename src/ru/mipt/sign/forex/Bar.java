@@ -13,8 +13,7 @@ public class Bar
     private Double low;
     private Date timestamp;
 
-    public Bar(Date date, Double open, Double close, Double low, Double high)
-    {
+    public Bar(Date date, Double open, Double close, Double low, Double high) {
         super();
         timestamp = date;
         this.open = open;
@@ -82,7 +81,7 @@ public class Bar
     public String toString()
     {
         DecimalFormat dform = new DecimalFormat("###.0000");
-        return "Date: " + timestamp.toString() + " - O/C/H/L - " + dform.format(open) + "  " + dform.format(close) + "  " + dform.format(high) + "  "
-                + dform.format(low);
+        return "Date: " + timestamp.toString() + " - O/C/H/L - " + dform.format(open) + "  " + dform.format(close)
+                + "  " + dform.format(high) + "  " + dform.format(low);
     }
 }

@@ -1,11 +1,7 @@
 package ru.mipt.sign.neurons;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.jdom.DataConversionException;
 import org.jdom.Element;
@@ -13,6 +9,7 @@ import org.jdom.Element;
 import ru.mipt.sign.connect.Connection;
 import ru.mipt.sign.core.SObject;
 import ru.mipt.sign.neurons.functions.ActivationFunction;
+import ru.mipt.sign.neurons.functions.LogisticFunction;
 import ru.mipt.sign.neurons.functions.Sigmoid;
 
 public class Neuron extends SObject
@@ -26,6 +23,28 @@ public class Neuron extends SObject
     private Integer outNumber = 0;
     private Integer state = NeuronConst.STATE_INIT;
     private ActivationFunction function;
+    private Double sum = 0d;
+    private HashMap<Integer, Double> delta;
+
+    public Double getDelta(Integer index)
+    {
+        return delta.get(index);
+    }
+
+    public void setDelta(Integer index, Double delta)
+    {
+        this.delta.put(index, delta);
+    }
+
+    public Double getWeight(Integer i, Integer j)
+    {
+        return weights.get(i).get(j);
+    }
+
+    public Double getSum()
+    {
+        return sum;
+    }
 
     public ActivationFunction getFunction()
     {
@@ -71,13 +90,13 @@ public class Neuron extends SObject
         {
             for (Integer j : weights.get(i).keySet())
             {
-                weights.get(i).put(j, Math.random());
+                Double random = (2 * Math.random() - 1);
+                weights.get(i).put(j, random); // [-1,1]
             }
         }
     }
 
-    public Neuron(Element elem)
-    {
+    public Neuron(Element elem) {
         super(elem);
         Element neuron = elem;
         try
@@ -145,8 +164,7 @@ public class Neuron extends SObject
         this.state = state;
     }
 
-    public Neuron(BigInteger id)
-    {
+    public Neuron(BigInteger id) {
         super(id);
 
         init();
@@ -166,6 +184,7 @@ public class Neuron extends SObject
         output = new HashMap<Integer, Double>(outNumber);
         weights = new HashMap<Integer, HashMap<Integer, Double>>(inNumber * outNumber);
         connections = new ArrayList<Connection>();
+        delta = new HashMap<Integer, Double>(outNumber);
         state = NeuronConst.STATE_INIT;
     }
 
@@ -194,7 +213,7 @@ public class Neuron extends SObject
         Double sum = 0.0;
         if (function == null)
         {
-            function = new Sigmoid();
+            function = new LogisticFunction();
         }
         for (Integer i = 0; i < outNumber; i++)
         {
@@ -203,6 +222,7 @@ public class Neuron extends SObject
             {
                 sum += weights.get(j).get(i) * input.get(j);
             }
+            this.sum = sum;
             sum = function.getValue(sum);
             output.put(i, sum);
         }
@@ -210,16 +230,7 @@ public class Neuron extends SObject
             state = NeuronConst.STATE_CALCULATED;
     }
 
-    public void changeAction(List<Integer> forOutputs, Double changeValue)
-    {
-        for (Integer i : forOutputs)
-        {
-            for (Integer j = 0; j < inNumber; j++)
-                weights.get(j).put(i, weights.get(j).get(i) * changeValue);
-        }
-    }
-
-    public void changeAction(Integer i, Integer j, Double changeValue)
+    public void changeWeight(Integer i, Integer j, Double changeValue)
     {
         weights.get(i).put(j, weights.get(i).get(j) + changeValue);
     }
@@ -320,6 +331,11 @@ public class Neuron extends SObject
         outNumber += extraNumber;
     }
 
+    public Integer getOutNumber()
+    {
+        return outNumber;
+    }
+
     public void addInputs(List<Integer> extra)
     {
         Integer extraNumber = extra.size();
@@ -332,6 +348,11 @@ public class Neuron extends SObject
             }
         }
         inNumber += extraNumber;
+    }
+
+    public Double getDerivative()
+    {
+        return function.getDerivative(sum);
     }
 
 }

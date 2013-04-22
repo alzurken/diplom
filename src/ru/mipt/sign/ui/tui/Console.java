@@ -12,11 +12,10 @@ import ru.mipt.sign.ui.tui.command.Result;
 public class Console
 {
 
-    public static void start(ApplicationContext app)
+    public static void start(ApplicationContext appCtx)
     {
         byte[] input = new byte[255];
-        ApplicationContext appCtx = app;
-        System.out.println("Sign v" + NeuronConst.VERSION + " running");
+        System.out.println("Sign v" + NeuronConst.VERSION + " started");
         Result result = Result.SUCCESSFUL;
         while (result != Result.EXIT)
         {
@@ -33,9 +32,14 @@ public class Console
 
             Command command = CommandFactory.INSTANCE.getCommand(commandString);
 
+            if (command == null)
+            {
+                System.out.println("Wrong command");
+                continue;
+            }
             try
             {
-                command.run(appCtx, commandString);
+                appCtx = command.run(appCtx, commandString);
                 result = command.getResult();
             } catch (NeuronException e)
             {
@@ -43,6 +47,7 @@ public class Console
             }
 
         }
+        System.out.println("Sign v" + NeuronConst.VERSION + " stopped");
     }
 
 }

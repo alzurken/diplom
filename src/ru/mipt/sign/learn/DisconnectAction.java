@@ -10,8 +10,7 @@ import ru.mipt.sign.neurons.NeuroNet;
 public class DisconnectAction extends LearningAction
 {
 
-    public DisconnectAction(NeuroNet nn, List result, List rightValue)
-    {
+    public DisconnectAction(NeuroNet nn, List result, List rightValue) {
         super(nn, result, rightValue);
     }
 

@@ -13,10 +13,20 @@ public class CreateCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
     {
-        appCtx = ConfigurationManager.init();
-        out.println("New net created. Input id = 1, Output number = 4");
+        String[] temp = command.split(" ");
+        Integer inNumber = 1;
+        Integer outNumber = 1;
+        if (temp.length > 2)
+        {
+            inNumber = Integer.valueOf(temp[1]);
+            outNumber = Integer.valueOf(temp[2]);
+        }
+        
+        appCtx = ConfigurationManager.init(inNumber, outNumber);
+        out.println("New net created. Input id = " + inNumber + ", Output number = " + outNumber);
+        return appCtx;
     }
 
     @Override

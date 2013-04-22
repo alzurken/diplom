@@ -14,7 +14,7 @@ public class LoadCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
     {
         String[] param = command.split(" ");
         String name = "";
@@ -38,6 +38,7 @@ public class LoadCommand extends Command
         {
             out.println("It's impossible to load file " + name + ".xml");
         }
+        return appCtx;
     }
 
     @Override

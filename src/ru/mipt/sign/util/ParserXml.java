@@ -56,8 +56,7 @@ public class ParserXml
         return 0;
     }
 
-    public ParserXml(String path) throws NextCommandException
-    {
+    public ParserXml(String path) throws NextCommandException {
         if (!path.isEmpty())
         {
             SAXBuilder builder = new SAXBuilder();
@@ -88,7 +87,8 @@ public class ParserXml
             {
                 e.printStackTrace();
             }
-        } else
+        }
+        else
         {
             System.out.println("Path for configuration is empty!");
         }

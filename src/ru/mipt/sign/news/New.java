@@ -14,8 +14,7 @@ public class New implements INew
         return amplitude * Math.exp(-t / amplitude);
     }
 
-    public New(String text)
-    {
+    public New(String text) {
         super();
         this.text = text;
     }

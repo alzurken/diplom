@@ -1,5 +1,7 @@
 package ru.mipt.sign.ui.tui.command;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,9 +14,12 @@ public class StartCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
     {
+
         appCtx.getManager().start(appCtx);
+
+        return appCtx;
     }
 
     @Override

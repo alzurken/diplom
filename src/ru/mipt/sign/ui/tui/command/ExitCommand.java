@@ -11,9 +11,10 @@ public class ExitCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out)
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out)
     {
         result = Result.EXIT;
+        return appCtx;
     }
 
     @Override

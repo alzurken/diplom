@@ -22,21 +22,18 @@ import ru.mipt.sign.util.XmlFormatter;
 public class ConfigurationManager
 {
     private static String DATA_PATH = "data/input.dat";
-    private static ApplicationContext applCtx;
+    private static ApplicationContext appCtx;
 
     public static ApplicationContext connect(BigInteger id1, BigInteger id2, Integer fiber) throws NeuronNotFound
     {
-        ApplicationContext appCtx = applCtx;
         NeuroNet nn = appCtx.getNet();
         nn.connectNeuron(id1, id2, fiber);
-        appCtx.setNet(nn);
-        applCtx = appCtx;
         return appCtx;
     }
 
     public static ApplicationContext removeNeuron(BigInteger id) throws NeuronNotFound
     {
-        ApplicationContext appCtx = applCtx;
+
         NeuroNet nn = appCtx.getNet();
 
         if (nn.removeNeuron(id) != 0)
@@ -44,21 +41,14 @@ public class ConfigurationManager
             throw new NeuronNotFound(id);
         }
         appCtx.setLast_removed_id(id);
-
-        appCtx.setNet(nn);
-        applCtx = appCtx;
         return appCtx;
     }
 
     public static ApplicationContext addNeuron()
     {
-        ApplicationContext appCtx = applCtx;
         NeuroNet nn = appCtx.getNet();
 
         appCtx.setLast_added_id(nn.addNeuron());
-
-        appCtx.setNet(nn);
-        applCtx = appCtx;
         return appCtx;
     }
 
@@ -70,35 +60,36 @@ public class ConfigurationManager
         }
         ParserXml parser = new ParserXml(NeuronConst.DEFAULT_CONF_PATH + key + ".xml");
 
-        ApplicationContext appCtx = new ApplicationContext(parser.getCurrentId());
+        appCtx = new ApplicationContext(parser.getCurrentId(), System.out);
         ImportData id = new ImportDataInput();
         appCtx.setData(id.getData(DATA_PATH));
         NeuroNet nn = new NeuroNet(parser, appCtx);
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
-        applCtx = appCtx;
         return appCtx;
 
     }
 
     public static ApplicationContext randomize()
     {
-        ApplicationContext appCtx = applCtx;
         NeuroNet nn = appCtx.getNet();
 
-        // z nn.randomize();
+        nn.randomize();
 
-        appCtx.setNet(nn);
         return appCtx;
     }
 
     public static ApplicationContext init()
     {
-        ApplicationContext appCtx = new ApplicationContext(BigInteger.ZERO);
+        return init(1, 1);
+    }
+
+    public static ApplicationContext init(Integer inNumber, Integer outNumber)
+    {// TODO megre init method
+        appCtx = new ApplicationContext(BigInteger.ZERO, System.out);
         ImportData id = new ImportDataInput();
         appCtx.setData(id.getData(DATA_PATH));
-        NeuroNet nn = new NeuroNet(1, appCtx);
-        nn.setInputNumber(1);
+        NeuroNet nn = new NeuroNet(inNumber, outNumber, appCtx);
         try
         {
             nn.setInputNeuron(BigInteger.ONE);
@@ -108,7 +99,6 @@ public class ConfigurationManager
         }
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
-        applCtx = appCtx;
         return appCtx;
     }
 
@@ -121,7 +111,7 @@ public class ConfigurationManager
     {
         Element root = new Element("configuration");
         Document doc = new Document(root);
-        root.addContent(applCtx.getNet().getXml());
+        root.addContent(appCtx.getNet().getXml());
         saveParams(root);
 
         String out = "";
@@ -143,7 +133,7 @@ public class ConfigurationManager
     private static void saveParams(Element conf)
     {
         Element id = new Element("current_id");
-        id.setAttribute("value", applCtx.getNextId().toString());
+        id.setAttribute("value", appCtx.getNextId().toString());
         conf.addContent(id);
     }
 

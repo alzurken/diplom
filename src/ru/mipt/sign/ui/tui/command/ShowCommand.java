@@ -12,9 +12,10 @@ public class ShowCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
     {
         out.println("Not supported yet");
+        return appCtx;
     }
 
     @Override

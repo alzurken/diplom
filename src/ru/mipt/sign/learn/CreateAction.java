@@ -1,11 +1,7 @@
 package ru.mipt.sign.learn;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import ru.mipt.sign.connect.Connection;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
@@ -16,8 +12,7 @@ import ru.mipt.sign.neurons.NeuronConst;
 public class CreateAction extends LearningAction
 {
 
-    public CreateAction(NeuroNet nn, List result, List rightValue)
-    {
+    public CreateAction(NeuroNet nn, List result, List rightValue) {
         super(nn, result, rightValue);
     }
 
@@ -51,7 +46,8 @@ public class CreateAction extends LearningAction
         index = rnd.intValue();// random index
         nn.connectNeuron(neurons.get(index), newNeuron, NeuronConst.DEFAULT_FIBER_NUMBER);
         nn.connectNeuron(newNeuron, zNeuron.getID(), NeuronConst.DEFAULT_FIBER_NUMBER);
-        this.message = "Create neuron # ID = " + newNeuron + ", connected from " + neurons.get(index) + " to " + zNeuron.getID();
+        this.message = "Create neuron # ID = " + newNeuron + ", connected from " + neurons.get(index) + " to "
+                + zNeuron.getID();
     }
 
 }

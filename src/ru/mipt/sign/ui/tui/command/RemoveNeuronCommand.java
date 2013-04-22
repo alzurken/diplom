@@ -14,13 +14,14 @@ public class RemoveNeuronCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
     {
         String[] temp = command.split(" ");
         BigInteger id = new BigInteger(temp[1]);
 
         appCtx = ConfigurationManager.removeNeuron(id);
         System.out.println("Neuron successfully removed, id = " + appCtx.getLast_removed_id());
+        return appCtx;
     }
 
     @Override

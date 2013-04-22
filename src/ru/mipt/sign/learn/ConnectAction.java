@@ -1,11 +1,7 @@
 package ru.mipt.sign.learn;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import ru.mipt.sign.connect.Connection;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
@@ -15,8 +11,7 @@ import ru.mipt.sign.neurons.NeuronConst;
 public class ConnectAction extends LearningAction
 {
 
-    public ConnectAction(NeuroNet nn, List result, List rightValue)
-    {
+    public ConnectAction(NeuroNet nn, List result, List rightValue) {
         super(nn, result, rightValue);
     }
 

@@ -1,99 +1,73 @@
 package ru.mipt.sign.learn;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import ru.mipt.sign.connect.Connection;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.neurons.Neuron;
-import ru.mipt.sign.neurons.NeuronConst;
-import ru.mipt.sign.neurons.functions.ActivationFunction;
 
 public class WeightAction extends LearningAction
 {
-    private Double accuracy = 1e-6;
-    private Double UP_EFFORT_MAX = 1.5;
-    private Double UP_EFFORT_MID = 1.2;
-    private Double UP_EFFORT_MIN = 1.05;
-    private Double DOWN_EFFORT_MAX = 0.3;
-    private Double DOWN_EFFORT_MID = 0.5;
-    private Double DOWN_EFFORT_MIN = 0.95;
+    double eta = 0.1;
 
-    public WeightAction(NeuroNet nn, List result, List rightValue)
-    {
+    public WeightAction(NeuroNet nn, List result, List rightValue) {
         super(nn, result, rightValue);
     }
 
-    // TODO Rewrite to back propagation algorithm
     @Override
     public void perform() throws NeuronNotFound
     {
-        List<Neuron> nextLayer = new ArrayList<Neuron>();
-        List<Double> values = result;
-        List<Double> right = rightValue;
-        for (int i = 0; i < 4; i++)
+        List<Neuron> lastNeurons = nn.getOutputNeurons();
+        for (int i = 0; i < lastNeurons.size(); i++)
         {
-            Neuron n = nn.getNeuron(NeuronConst.LAST_NEURON_ID.add(BigInteger.valueOf(i)));
-            Double effort = getEffort(values.get(i), right.get(i));
-            // n.changeAction(0, effort);
-            nextLayer.add(n);
-        }
-        while (!nextLayer.isEmpty())
-        {
-            Iterator<Neuron> nIt = nextLayer.iterator();
-            List<Neuron> temp = new ArrayList<Neuron>();
-            while (nIt.hasNext())
+            Neuron n = lastNeurons.get(i);
+            Double out = n.getOutput().get(0);
+            Double delta = (out - (Double) rightValue.get(i)) * n.getDerivative();
+            n.setDelta(0, delta); //TODO for 1 output only, refactor 
+            Map<Integer, Double> input = n.getInput();
+            for (int j = 0; j < n.getInNumber(); j++)
             {
-                Neuron cur = nIt.next();
-                List<Connection> conns = nn.getConnectionsForZNeuron(cur.getID());
-                Iterator<Connection> it = conns.iterator();
-                while (it.hasNext())
+                Double deltaWeight = -eta * input.get(j) * delta;
+                n.changeWeight(j, 0, deltaWeight);
+            }
+        }
+        List<Neuron> neuronList = new ArrayList<Neuron>();
+        for (Neuron n : lastNeurons)
+        {
+            List<Connection> connections = nn.getConnectionsForZNeuron(n.getID());
+            for (Connection c : connections)
+            {
+                neuronList.add(c.getANeuron());
+            }
+        }
+
+        for (Neuron n : neuronList)
+        {
+            List<Connection> connections = nn.getConnectionsForANeuron(n.getID());
+            for (Connection c : connections)
+            {
+                Map<Integer, Integer> a2zmapping = c.getA2zMapping();
+                Neuron next = c.getZNeuron();
+                for (Integer j : a2zmapping.keySet())
                 {
-                    Connection con = it.next();
-                    Neuron a = con.getANeuron();
-                    Neuron z = con.getZNeuron();
-                    // a.changeAction(con.getOutputNumbers(), z.getLearningEffor());
-                    temp.add(a);
+                    Double deltaSum = 0d;
+                    
+                    for (int k = 0; k < next.getOutNumber(); k++)
+                    {
+                        deltaSum += next.getWeight(a2zmapping.get(j), k) * next.getDelta(k);
+                    }
+                    Double delta = n.getDerivative() * deltaSum;
+                    n.setDelta(j, delta);
+                    for (int i = 0; i<n.getInNumber(); i++)
+                    {
+                        Double deltaWeight = - eta * n.getInput().get(i)  * delta;
+                        n.changeWeight(i, j, deltaWeight);
+                    }
                 }
             }
-            nextLayer = temp;
         }
-        this.message = "Weight action";
-    }
-
-    private Double getEffort(Double value, Double right)
-    {
-        Double alpha = Math.abs(right / value);
-        if (alpha > UP_EFFORT_MAX)
-            return Math.signum(alpha) * UP_EFFORT_MAX;
-        if (alpha > UP_EFFORT_MID)
-            return Math.signum(alpha) * UP_EFFORT_MID;
-        if (alpha > UP_EFFORT_MIN)
-            return Math.signum(alpha) * UP_EFFORT_MIN;
-        if (alpha > DOWN_EFFORT_MIN)
-            return Math.signum(alpha) * DOWN_EFFORT_MIN;
-        if (alpha > DOWN_EFFORT_MID)
-            return Math.signum(alpha) * DOWN_EFFORT_MID;
-        if (alpha > DOWN_EFFORT_MAX)
-            return Math.signum(alpha) * DOWN_EFFORT_MAX;
-        return Math.signum(alpha) * DOWN_EFFORT_MAX * DOWN_EFFORT_MAX;
-    }
-
-    private List<Double> getInverse(ActivationFunction func, List<Double> values)
-    {
-        List<Double> result = new ArrayList<Double>();
-        for (Integer i = 0; i < values.size(); i++)
-        {
-            result.add(func.getInverseValue(values.get(i)));
-        }
-        return result;
-    }
-
-    private boolean equals(Double x1, Double x2)
-    {
-        return Math.abs(x1 - x2) < accuracy;
     }
 }

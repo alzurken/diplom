@@ -29,9 +29,9 @@ public abstract class Command
         return false;
     }
 
-    public void run(ApplicationContext appCtx, String command) throws NeuronException
+    public ApplicationContext run(ApplicationContext appCtx, String command) throws NeuronException
     {
-        run(appCtx, command, System.out);
+        return run(appCtx, command, System.out);
     }
 
     public Result getResult()
@@ -39,7 +39,7 @@ public abstract class Command
         return result;
     }
 
-    public abstract void run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException;
+    public abstract ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException;
 
     public abstract List<String> initCommandList();
 }

@@ -18,8 +18,7 @@ public class RSSParser
     private List<SyndEntry> news_list = new ArrayList<SyndEntry>();
     private URL url;
 
-    public RSSParser(URL url)
-    {
+    public RSSParser(URL url) {
         this.url = url;
     }
 
@@ -70,10 +69,12 @@ public class RSSParser
                 SyndEntry entry = i.next();
                 System.out.println(entry.getPublishedDate());
                 System.out.println(entry.getTitle());
-                System.out.println(entry.getDescription().getValue().replaceAll("\\<.*?\\>", "").replaceAll("\\&.*?\\;", ""));
+                System.out.println(entry.getDescription().getValue().replaceAll("\\<.*?\\>", "")
+                        .replaceAll("\\&.*?\\;", ""));
 
             }
-        } finally
+        }
+        finally
         {
             if (reader != null)
                 reader.close();

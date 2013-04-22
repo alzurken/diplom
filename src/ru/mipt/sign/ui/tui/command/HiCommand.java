@@ -11,9 +11,10 @@ public class HiCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out)
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out)
     {
         out.println("Ye, ye, i'm working, everything ok");
+        return appCtx;
     }
 
     @Override

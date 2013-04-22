@@ -13,10 +13,11 @@ public class AddNeuronCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
     {
         appCtx = ConfigurationManager.addNeuron();
         out.println("Neuron created, id = " + appCtx.getLast_added_id());
+        return appCtx;
     }
 
     @Override

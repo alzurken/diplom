@@ -3,15 +3,15 @@ package ru.mipt.sign.util;
 /*************************************************************************
  * Compilation: javac FFT.java Execution: java FFT N Dependencies: Complex.java
  * 
- * Compute the FFT and inverse FFT of a length N complex sequence. Bare bones implementation that
- * runs in O(N log N) time. Our goal is to optimize the clarity of the code, rather than
- * performance.
+ * Compute the FFT and inverse FFT of a length N complex sequence. Bare bones
+ * implementation that runs in O(N log N) time. Our goal is to optimize the
+ * clarity of the code, rather than performance.
  * 
  * Limitations ----------- - assumes N is a power of 2
  * 
- * - not the most memory efficient algorithm (because it uses an object type for representing
- * complex numbers and because it re-allocates memory for the subarray, instead of doing in-place or
- * reusing a single temporary array)
+ * - not the most memory efficient algorithm (because it uses an object type for
+ * representing complex numbers and because it re-allocates memory for the
+ * subarray, instead of doing in-place or reusing a single temporary array)
  * 
  *************************************************************************/
 

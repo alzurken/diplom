@@ -1,5 +1,6 @@
 package ru.mipt.sign;
 
+import java.io.PrintStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,12 @@ public class ApplicationContext
     private NeuroNet net;
     private List<Bar> data = new ArrayList<Bar>();
     private NeuroManager manager;
+    private PrintStream out;
+
+    public PrintStream getOut()
+    {
+        return out;
+    }
 
     public BigInteger getLast_removed_id()
     {
@@ -47,10 +54,10 @@ public class ApplicationContext
         this.manager = manager;
     }
 
-    public ApplicationContext(BigInteger current_id)
-    {
+    public ApplicationContext(BigInteger current_id, PrintStream out) {
         super();
         this.current_id = current_id;
+        this.out = out;
     }
 
     public void setCurrent_id(BigInteger current_id)

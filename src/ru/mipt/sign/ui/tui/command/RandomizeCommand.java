@@ -13,16 +13,17 @@ public class RandomizeCommand extends Command
 {
 
     @Override
-    public void run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
     {
         appCtx = ConfigurationManager.randomize();
         out.println("All weights randomized");
+        return appCtx;
     }
 
     @Override
     public List<String> initCommandList()
     {
-        return new ArrayList<String>(Arrays.asList("randomize"));
+        return new ArrayList<String>(Arrays.asList("random"));
     }
 
 }
