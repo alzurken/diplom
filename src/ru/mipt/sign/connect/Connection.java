@@ -168,9 +168,9 @@ public class Connection extends SObject
         List<Integer> aSide = aNeuron.getUnboundOutputs(fiber); // set output
                                                                 // number resize
                                                                 // neuron
-        aNeuron.addOutputs(aSide);
+        aNeuron.addOutputs(aSide.size());
         List<Integer> zSide = zNeuron.getUnboundInputs(fiber);
-        zNeuron.addInputs(zSide);
+        zNeuron.addInputs(zSide.size());
         for (Integer i = 0; i < aSide.size(); i++)
         {
             a2zMapping.put(aSide.get(i), zSide.get(i));
@@ -193,5 +193,18 @@ public class Connection extends SObject
     public String getType()
     {
         return "connection";
+    }
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        sb.append("Connection:");
+        sb.append(" ID = " + id);
+        sb.append(" A Side = " + aNeuron);
+        sb.append(" Z Side = " + zNeuron);
+        sb.append("]");
+        return sb.toString();
     }
 }

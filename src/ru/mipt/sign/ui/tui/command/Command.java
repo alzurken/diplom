@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronException;
 
 public abstract class Command
@@ -29,9 +28,9 @@ public abstract class Command
         return false;
     }
 
-    public ApplicationContext run(ApplicationContext appCtx, String command) throws NeuronException
+    public void run( String command) throws NeuronException
     {
-        return run(appCtx, command, System.out);
+        run(command, System.out);
     }
 
     public Result getResult()
@@ -39,7 +38,7 @@ public abstract class Command
         return result;
     }
 
-    public abstract ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException;
+    public abstract void run(String command, PrintStream out) throws NeuronException;
 
     public abstract List<String> initCommandList();
 }

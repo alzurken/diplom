@@ -17,13 +17,12 @@ public class DisconnectAction extends LearningAction
     @Override
     public void perform() throws NeuronNotFound
     {
-        List<BigInteger> neurons = nn.getNeurons();
+        List<BigInteger> neurons = nn.getNeuronIDs();
 
         Double rnd = Math.floor(Math.random() * neurons.size());
         Integer index = rnd.intValue();// random index
         BigInteger id = neurons.get(index);
         List<Connection> connections = nn.getConnectionsForZNeuron(id);
-
         if (connections.size() > 1)
         {
             connections.get(0).disconnect();

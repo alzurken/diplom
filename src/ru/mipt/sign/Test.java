@@ -1,5 +1,7 @@
 package ru.mipt.sign;
 
+import java.util.Random;
+
 public class Test
 {
 
@@ -8,8 +10,6 @@ public class Test
      */
     public static void main(String[] args)
     {
-        // TODO Test code
-
     }
 
 }

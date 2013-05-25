@@ -14,8 +14,9 @@ public class LoadCommand extends Command
 {
 
     @Override
-    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public void run(String command, PrintStream out) throws NeuronException
     {
+        ApplicationContext appCtx = ApplicationContext.getInstance();
         String[] param = command.split(" ");
         String name = "";
         try
@@ -25,12 +26,12 @@ public class LoadCommand extends Command
                 name = param[1];
                 if ((name != null) && (!name.isEmpty()))
                 {
-                    appCtx = ConfigurationManager.init(name);
+                    ConfigurationManager.init(name);
                     out.println("Configuration loaded from " + param[1] + ".xml file");
                 } else
                 {
                     name = "configuration";
-                    appCtx = ConfigurationManager.init("");
+                    ConfigurationManager.init("");
                     out.println("NeuroNet loaded from default configuration");
                 }
             }
@@ -38,7 +39,6 @@ public class LoadCommand extends Command
         {
             out.println("It's impossible to load file " + name + ".xml");
         }
-        return appCtx;
     }
 
     @Override

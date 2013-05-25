@@ -26,7 +26,7 @@ public class ParserXml
     NeuroNet net = new NeuroNet();
     Document doc;
 
-    public BigInteger getCurrentId()
+    public BigInteger getCurrentID()
     {
         XPath xpath;
         try

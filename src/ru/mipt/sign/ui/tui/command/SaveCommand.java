@@ -16,7 +16,7 @@ public class SaveCommand extends Command
 {
 
     @Override
-    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public void run(String command, PrintStream out) throws NeuronException
     {
         String[] param = command.split(" ");
         if (param.length > 1)
@@ -37,7 +37,6 @@ public class SaveCommand extends Command
             ConfigurationManager.saveConfiguration(name);
             out.println("Configuration saved to /config/" + name + ".xml");
         }
-        return appCtx;
     }
 
     @Override

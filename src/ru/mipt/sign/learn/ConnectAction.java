@@ -18,7 +18,7 @@ public class ConnectAction extends LearningAction
     @Override
     public void perform() throws NeuronNotFound
     {
-        List<BigInteger> neurons = nn.getNeurons();
+        List<BigInteger> neurons = nn.getNeuronIDs();
         neurons.remove(new BigInteger("1"));
         Double rnd = Math.floor(Math.random() * neurons.size());
         Integer index = rnd.intValue();// random index

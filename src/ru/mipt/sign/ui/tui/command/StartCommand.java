@@ -14,12 +14,11 @@ public class StartCommand extends Command
 {
 
     @Override
-    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public void run(String command, PrintStream out) throws NeuronException
     {
 
-        appCtx.getManager().start(appCtx);
+        ApplicationContext.getInstance().getManager().start();
 
-        return appCtx;
     }
 
     @Override

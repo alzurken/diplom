@@ -5,14 +5,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronException;
 
 public class HelpCommand extends Command
 {
 
     @Override
-    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public void run(String command, PrintStream out) throws NeuronException
     {
         StringBuilder sb = new StringBuilder();
         sb.append("<== HELP ==>\n");
@@ -20,7 +19,6 @@ public class HelpCommand extends Command
         sb.append("Type <config> for configuring net structure\n");
         sb.append("Type <save>/<load> for saving/loading net configuration\n");
         out.println(sb.toString());
-        return appCtx;
     }
 
     @Override

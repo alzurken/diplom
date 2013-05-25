@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,9 +19,10 @@ import ru.mipt.sign.neurons.NeuroNet;
 public class NeuroManager
 {
 
-    public void start(ApplicationContext appCtx) throws NeuronNotFound
+    public void start() throws NeuronNotFound
     {
-        NeuroNet nn = appCtx.getNet();
+        ApplicationContext appCtx = ApplicationContext.getInstance();
+        NeuroNet nn = appCtx.getNeuroNet();
         List<Bar> in = appCtx.getData();
         List<Double> forCompare = new ArrayList<Double>();
         List<Double> rightResult = new ArrayList<Double>();

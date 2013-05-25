@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.ConfigurationManager;
 import ru.mipt.sign.core.exceptions.NeuronException;
 
@@ -13,7 +12,7 @@ public class CreateCommand extends Command
 {
 
     @Override
-    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public void run(String command, PrintStream out) throws NeuronException
     {
         String[] temp = command.split(" ");
         Integer inNumber = 1;
@@ -24,9 +23,8 @@ public class CreateCommand extends Command
             outNumber = Integer.valueOf(temp[2]);
         }
         
-        appCtx = ConfigurationManager.init(inNumber, outNumber);
+        ConfigurationManager.init(inNumber, outNumber);
         out.println("New net created. Input id = " + inNumber + ", Output number = " + outNumber);
-        return appCtx;
     }
 
     @Override

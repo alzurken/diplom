@@ -20,7 +20,7 @@ public class CreateAction extends LearningAction
     public void perform() throws NeuronNotFound
     {
         BigInteger newNeuron = nn.addNeuron();
-        List<BigInteger> neurons = nn.getNeurons();
+        List<BigInteger> neurons = nn.getNeuronIDs();
         neurons.remove(new BigInteger("1"));
         neurons.remove(nn.getNeuron(newNeuron).getID());
         Double rnd = Math.floor(Math.random() * neurons.size());

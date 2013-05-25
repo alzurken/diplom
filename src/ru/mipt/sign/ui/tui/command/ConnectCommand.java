@@ -15,8 +15,9 @@ public class ConnectCommand extends Command
 {
 
     @Override
-    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public void run(String command, PrintStream out) throws NeuronException
     {
+        ApplicationContext appCtx = ApplicationContext.getInstance();
         String[] temp = command.split(" ");
         if (temp.length < 4)
         {
@@ -27,10 +28,10 @@ public class ConnectCommand extends Command
         if (temp[2].equalsIgnoreCase("last"))
         {
             Integer fiber = Integer.valueOf(temp[3]);
-            for (int i = 0; i < appCtx.getNet().getOutputNumber(); i++)
+            for (int i = 0; i < appCtx.getNeuroNet().getOutputNumber(); i++)
             {
                 id2 = NeuronConst.LAST_NEURON_ID.add(BigInteger.valueOf(i));
-                appCtx = ConfigurationManager.connect(id1, id2, fiber);
+                ConfigurationManager.connect(id1, id2, fiber);
                 out.println("Connected successfully");
             }
 
@@ -38,10 +39,9 @@ public class ConnectCommand extends Command
         {
             id2 = new BigInteger(temp[2]);
             Integer fiber = Integer.valueOf(temp[3]);
-            appCtx = ConfigurationManager.connect(id1, id2, fiber);
+            ConfigurationManager.connect(id1, id2, fiber);
             out.println("Connected successfully");
         }
-        return appCtx;
     }
 
     @Override

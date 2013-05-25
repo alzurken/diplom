@@ -35,14 +35,19 @@ public class NeuroNet
         return outputNumber;
     }
 
-    public List<BigInteger> getNeurons()
+    public List<Neuron> getNeurons()
+    {
+        return new ArrayList<Neuron>(neuroPool.values());
+    }
+    
+    public List<BigInteger> getNeuronIDs()
     {
         return new ArrayList<BigInteger>(neuroPool.keySet());
     }
 
-    public List<BigInteger> getConnections()
+    public List<Connection> getConnections()
     {
-        return new ArrayList<BigInteger>(connPool.keySet());
+        return new ArrayList<Connection>(connPool.values());
     }
 
     public List<Connection> getConnectionsForZNeuron(BigInteger id)
@@ -156,7 +161,7 @@ public class NeuroNet
         {
             for (Integer i = 0; i < neurons.size(); i++)
             {
-                inputNeurons.add(getNeuron(neurons.get(i)));
+                setInputNeuron(getNeuron(neurons.get(i)));
             }
         }
         inputNumber = inputNeurons.size();
@@ -167,8 +172,7 @@ public class NeuroNet
         for (Iterator<Neuron> it = this.neuroPool.values().iterator(); it.hasNext();)
         {
             Neuron n = it.next();
-            if (n.getState() != NeuronConst.STATE_OUTPUT)
-                n.setState(NeuronConst.STATE_INIT);
+            n.setState(NeuronConst.STATE_INIT);
         }
         for (Iterator<Neuron> it = this.inputNeurons.iterator(); it.hasNext();)
         {
@@ -179,6 +183,16 @@ public class NeuroNet
 
     public Integer removeNeuron(BigInteger id)
     {
+        List<Connection> connections = this.getConnectionsForZNeuron(id);
+        connections.addAll(this.getConnectionsForANeuron(id));
+        if (connections.size() > 0)
+        {
+            for (Connection c : connections)
+            {
+                c.disconnect();
+                this.removeConnection(c.getID());
+            }
+        }
         return neuroPool.remove(id) != null ? 0 : 1;
     }
 
@@ -189,8 +203,14 @@ public class NeuroNet
 
     public void setInputNeuron(BigInteger id) throws NeuronNotFound
     {
-        inputNeurons.add(this.getNeuron(id));
-        getNeuron(id).setInNumber(1);
+        setInputNeuron(getNeuron(id));
+    }
+    
+    public void setInputNeuron(Neuron n) throws NeuronNotFound
+    {
+        inputNeurons.add(n);
+        n.setRole(NeuronConst.INPUT_ROLE);
+        n.setInNumber(1);
     }
 
     public void connectNeuron(BigInteger id1, BigInteger id2, Integer fiber) throws NeuronNotFound
@@ -220,7 +240,7 @@ public class NeuroNet
             neuroPool.put(out.getID(), out);
             try
             {
-                setOutput(out.getID());
+                setOutputNeuron(out.getID());
             } catch (NeuronNotFound e)
             {
                 e.printStackTrace();
@@ -241,28 +261,27 @@ public class NeuroNet
         }
     }
 
-    public void setOutput(List<BigInteger> out) throws NeuronNotFound
+    public void setOutputNeuron(List<BigInteger> out) throws NeuronNotFound
     {
         for (BigInteger id : out)
         {
-            setOutput(id, false);
+            setOutputNeuron(getNeuron(id), false);
         }
     }
 
-    public void setOutput(BigInteger id) throws NeuronNotFound
+    public void setOutputNeuron(BigInteger id) throws NeuronNotFound
     {
-        setOutput(id, true);
+        setOutputNeuron(getNeuron(id), true);
     }
 
-    public void setOutput(BigInteger id, boolean addOutput) throws NeuronNotFound
+    public void setOutputNeuron(Neuron n, boolean addOutput) throws NeuronNotFound
     {
-        Neuron n = getNeuron(id);
-        n.setState(NeuronConst.STATE_OUTPUT);
+        n.setRole(NeuronConst.OUTPUT_ROLE);
         if (addOutput)
         {
             List<Integer> outputs = new ArrayList<Integer>();
             outputs.add(0);
-            n.addOutputs(outputs);
+            n.addOutputs(outputs.size());
         }
         outputNeurons.add(n);
         outputNumber = outputNeurons.size();
@@ -292,7 +311,7 @@ public class NeuroNet
             }
         }
         setInput(parser.getNeuronsByKey("input_neurons"));
-        setOutput(parser.getNeuronsByKey("output_neurons"));
+        setOutputNeuron(parser.getNeuronsByKey("output_neurons"));
     }
 
     public BigInteger addNeuron()
@@ -319,7 +338,6 @@ public class NeuroNet
     public void calc() throws NeuronNotFound
     {
         cache = new HashMap<BigInteger, Neuron>();
-        Collection<Neuron> outputs = new ArrayList<Neuron>();
         for (BigInteger k : neuroPool.keySet())
         {
             SObject so = neuroPool.get(k);
@@ -334,10 +352,6 @@ public class NeuroNet
             if (n.getState() == NeuronConst.STATE_INIT)
             {
                 cache.put(n.getID(), n);
-            }
-            if (n.getState() == NeuronConst.STATE_OUTPUT)
-            {
-                outputs.add(n);
             }
         }
         while (!cache.isEmpty())
@@ -359,10 +373,6 @@ public class NeuroNet
             }
             cache = bufferCache;
         }
-        for (Neuron n : outputs)
-        {
-            n.calc();
-        }
     }
 
     public Set<Neuron> getPrevious(List<Neuron> layer)
@@ -383,7 +393,7 @@ public class NeuroNet
     public String toString()
     {
         StringBuffer out = new StringBuffer();
-        Element net = appCtx.getNet().getXml();
+        Element net = appCtx.getNeuroNet().getXml();
         out.append(net.toString());
         if (!net.getChildren().isEmpty())
         {

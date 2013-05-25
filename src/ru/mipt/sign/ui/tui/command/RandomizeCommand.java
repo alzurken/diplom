@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.ConfigurationManager;
 import ru.mipt.sign.core.exceptions.NeuronException;
 
@@ -13,11 +12,10 @@ public class RandomizeCommand extends Command
 {
 
     @Override
-    public ApplicationContext run(ApplicationContext appCtx, String command, PrintStream out) throws NeuronException
+    public void run(String command, PrintStream out) throws NeuronException
     {
-        appCtx = ConfigurationManager.randomize();
+        ConfigurationManager.randomize();
         out.println("All weights randomized");
-        return appCtx;
     }
 
     @Override

@@ -18,10 +18,27 @@ public class ApplicationContext
     private List<Bar> data = new ArrayList<Bar>();
     private NeuroManager manager;
     private PrintStream out;
-
+    private static ApplicationContext instance = new ApplicationContext();
+    
+    public static ApplicationContext getInstance()
+    {
+        return instance;
+    }
+    
+    private ApplicationContext()
+    {
+        
+    }
+    
+    
     public PrintStream getOut()
     {
         return out;
+    }
+
+    public void setOut(PrintStream out)
+    {
+        this.out = out;
     }
 
     public BigInteger getLast_removed_id()
@@ -54,13 +71,7 @@ public class ApplicationContext
         this.manager = manager;
     }
 
-    public ApplicationContext(BigInteger current_id, PrintStream out) {
-        super();
-        this.current_id = current_id;
-        this.out = out;
-    }
-
-    public void setCurrent_id(BigInteger current_id)
+    public void setCurrentID(BigInteger current_id)
     {
         this.current_id = current_id;
     }
@@ -70,7 +81,7 @@ public class ApplicationContext
         this.net = net;
     }
 
-    public NeuroNet getNet()
+    public NeuroNet getNeuroNet()
     {
         return net;
     }

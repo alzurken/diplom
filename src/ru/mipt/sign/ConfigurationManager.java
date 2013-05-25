@@ -22,37 +22,33 @@ import ru.mipt.sign.util.XmlFormatter;
 public class ConfigurationManager
 {
     private static String DATA_PATH = "data/input.dat";
-    private static ApplicationContext appCtx;
 
-    public static ApplicationContext connect(BigInteger id1, BigInteger id2, Integer fiber) throws NeuronNotFound
+    public static void connect(BigInteger id1, BigInteger id2, Integer fiber) throws NeuronNotFound
     {
-        NeuroNet nn = appCtx.getNet();
+        NeuroNet nn = ApplicationContext.getInstance().getNeuroNet();
         nn.connectNeuron(id1, id2, fiber);
-        return appCtx;
     }
 
-    public static ApplicationContext removeNeuron(BigInteger id) throws NeuronNotFound
+    public static void removeNeuron(BigInteger id) throws NeuronNotFound
     {
 
-        NeuroNet nn = appCtx.getNet();
+        NeuroNet nn = ApplicationContext.getInstance().getNeuroNet();
 
         if (nn.removeNeuron(id) != 0)
         {
             throw new NeuronNotFound(id);
         }
-        appCtx.setLast_removed_id(id);
-        return appCtx;
+        ApplicationContext.getInstance().setLast_removed_id(id);
     }
 
-    public static ApplicationContext addNeuron()
+    public static void addNeuron()
     {
-        NeuroNet nn = appCtx.getNet();
+        NeuroNet nn = ApplicationContext.getInstance().getNeuroNet();
 
-        appCtx.setLast_added_id(nn.addNeuron());
-        return appCtx;
+        ApplicationContext.getInstance().setLast_added_id(nn.addNeuron());
     }
 
-    public static ApplicationContext init(String key) throws NeuronNotFound, NextCommandException
+    public static void init(String key) throws NeuronNotFound, NextCommandException
     {
         if ((key == null) || (key.isEmpty()))
         {
@@ -60,33 +56,34 @@ public class ConfigurationManager
         }
         ParserXml parser = new ParserXml(NeuronConst.DEFAULT_CONF_PATH + key + ".xml");
 
-        appCtx = new ApplicationContext(parser.getCurrentId(), System.out);
+        ApplicationContext appCtx = ApplicationContext.getInstance();
+        appCtx.setCurrentID(parser.getCurrentID());
+        appCtx.setOut(System.out);
         ImportData id = new ImportDataInput();
         appCtx.setData(id.getData(DATA_PATH));
         NeuroNet nn = new NeuroNet(parser, appCtx);
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
-        return appCtx;
 
     }
 
-    public static ApplicationContext randomize()
+    public static void randomize()
     {
-        NeuroNet nn = appCtx.getNet();
+        NeuroNet nn = ApplicationContext.getInstance().getNeuroNet();
 
         nn.randomize();
-
-        return appCtx;
     }
 
-    public static ApplicationContext init()
+    public static void init()
     {
-        return init(1, 1);
+        init(1, 1);
     }
 
-    public static ApplicationContext init(Integer inNumber, Integer outNumber)
+    public static void init(Integer inNumber, Integer outNumber)
     {// TODO megre init method
-        appCtx = new ApplicationContext(BigInteger.ZERO, System.out);
+        ApplicationContext appCtx = ApplicationContext.getInstance();
+        appCtx.setCurrentID(BigInteger.ZERO);
+        appCtx.setOut(System.out);
         ImportData id = new ImportDataInput();
         appCtx.setData(id.getData(DATA_PATH));
         NeuroNet nn = new NeuroNet(inNumber, outNumber, appCtx);
@@ -99,7 +96,6 @@ public class ConfigurationManager
         }
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
-        return appCtx;
     }
 
     public static void exit()
@@ -111,7 +107,7 @@ public class ConfigurationManager
     {
         Element root = new Element("configuration");
         Document doc = new Document(root);
-        root.addContent(appCtx.getNet().getXml());
+        root.addContent(ApplicationContext.getInstance().getNeuroNet().getXml());
         saveParams(root);
 
         String out = "";
@@ -133,7 +129,7 @@ public class ConfigurationManager
     private static void saveParams(Element conf)
     {
         Element id = new Element("current_id");
-        id.setAttribute("value", appCtx.getNextId().toString());
+        id.setAttribute("value", ApplicationContext.getInstance().getNextId().toString());
         conf.addContent(id);
     }
 
