@@ -3,8 +3,8 @@ package ru.mipt.sign.learn;
 import java.math.BigInteger;
 import java.util.List;
 
-import ru.mipt.sign.connect.Connection;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
+import ru.mipt.sign.neurons.Connection;
 import ru.mipt.sign.neurons.NeuroNet;
 
 public class DisconnectAction extends LearningAction
@@ -26,7 +26,7 @@ public class DisconnectAction extends LearningAction
         if (connections.size() > 1)
         {
             connections.get(0).disconnect();
-            nn.removeConnection(connections.get(0).getID());
+            nn.removeConnection(connections.get(0));
             this.message = "Disconnected from " + id + " to " + connections.get(0).getAID();
         }
         this.message = "Disconnect action. Nothing happend";

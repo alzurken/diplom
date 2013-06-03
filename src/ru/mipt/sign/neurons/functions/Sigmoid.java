@@ -4,16 +4,16 @@ import ru.mipt.sign.core.exceptions.CalculationException;
 
 public class Sigmoid implements ActivationFunction
 {
-    private Double alpha = 0.1;
+    private double alpha = 0.1;
 
     @Override
-    public Double getValue(Double x)
+    public double getValue(double x)
     {
         return x/(Math.abs(x) + alpha);//x/(|x|+a)
     }
 
     @Override
-    public Double getInverseValue(Double y)
+    public double getInverseValue(double y)
     {
     	if (Math.abs(y) >= 1)
     	{
@@ -30,7 +30,7 @@ public class Sigmoid implements ActivationFunction
     }
 
 	@Override
-	public Double getDerivative(Double x) {
+	public double getDerivative(double x) {
 		return alpha/(Math.abs(x) + alpha)/(Math.abs(x) + alpha); //a/(|x|+a)^2
 	    
 	}

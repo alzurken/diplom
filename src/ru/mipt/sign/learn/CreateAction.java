@@ -3,8 +3,8 @@ package ru.mipt.sign.learn;
 import java.math.BigInteger;
 import java.util.*;
 
-import ru.mipt.sign.connect.Connection;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
+import ru.mipt.sign.neurons.Connection;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.neurons.Neuron;
 import ru.mipt.sign.neurons.NeuronConst;

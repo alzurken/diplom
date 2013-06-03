@@ -1,4 +1,4 @@
-package ru.mipt.sign.connect;
+package ru.mipt.sign.neurons;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -6,12 +6,9 @@ import java.util.*;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
-import ru.mipt.sign.core.SObject;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
-import ru.mipt.sign.neurons.NeuroNet;
-import ru.mipt.sign.neurons.Neuron;
 
-public class Connection extends SObject
+public class Connection
 {
     private Neuron aNeuron;
     private Neuron zNeuron;
@@ -61,7 +58,7 @@ public class Connection extends SObject
         return min >= start;
     }
 
-    public void moveASide(Integer delta)
+    public void moveASide(int delta)
     {
         HashMap<Integer, Integer> temp = new HashMap<Integer, Integer>();
         for (Integer i : a2zMapping.keySet())
@@ -71,7 +68,7 @@ public class Connection extends SObject
         a2zMapping = temp;
     }
 
-    public void moveZSide(Integer delta)
+    public void moveZSide(int delta)
     {
         HashMap<Integer, Integer> temp = new HashMap<Integer, Integer>();
         for (Integer i : a2zMapping.keySet())
@@ -103,7 +100,6 @@ public class Connection extends SObject
     }
 
     public Connection(Element el, NeuroNet nn) throws NeuronNotFound {
-        super(el);
         parent = nn;
         Element connection = el;
         init();
@@ -129,8 +125,7 @@ public class Connection extends SObject
         }
     }
 
-    public Connection(BigInteger id, NeuroNet nn) {
-        super(id);
+    public Connection(NeuroNet nn) {
         init();
         parent = nn;
     }
@@ -140,19 +135,17 @@ public class Connection extends SObject
         a2zMapping = new HashMap<Integer, Integer>();
     }
 
-    @Override
     public Element getXML()
     {
         Element connection = new Element("connection");
-        connection.setAttribute("id", id.toString());
         connection.setAttribute("aNeuron", aNeuron.getID().toString());
         connection.setAttribute("zNeuron", zNeuron.getID().toString());
 
         Element mapping = new Element("mapping");
-        for (Integer i : a2zMapping.keySet())
+        for (int i : a2zMapping.keySet())
         {
             Element item = new Element("item");
-            item.setAttribute("a", i.toString());
+            item.setAttribute("a", Integer.toString(i));
             item.setAttribute("z", a2zMapping.get(i).toString());
             mapping.addContent(item);
         }
@@ -160,7 +153,7 @@ public class Connection extends SObject
         return connection;
     }
 
-    public void connect(BigInteger aNeuronID, BigInteger zNeuronID, Integer fiber) throws NeuronNotFound
+    public void connect(BigInteger aNeuronID, BigInteger zNeuronID, int fiber) throws NeuronNotFound
     {
         aNeuron = parent.getNeuron(aNeuronID);
         aNeuron.addConnection(this);
@@ -171,7 +164,7 @@ public class Connection extends SObject
         aNeuron.addOutputs(aSide.size());
         List<Integer> zSide = zNeuron.getUnboundInputs(fiber);
         zNeuron.addInputs(zSide.size());
-        for (Integer i = 0; i < aSide.size(); i++)
+        for (int i = 0; i < aSide.size(); i++)
         {
             a2zMapping.put(aSide.get(i), zSide.get(i));
         }
@@ -182,29 +175,65 @@ public class Connection extends SObject
     {
         Map<Integer, Double> output = aNeuron.getOutput();
         Integer zIndex;
-        for (Integer i : a2zMapping.keySet())
+        for (int i : a2zMapping.keySet())
         {
             zIndex = a2zMapping.get(i);
             zNeuron.addInputValue(zIndex, output.get(i));
         }
     }
 
-    @Override
     public String getType()
     {
         return "connection";
     }
     
-    @Override
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         sb.append("Connection:");
-        sb.append(" ID = " + id);
         sb.append(" A Side = " + aNeuron);
         sb.append(" Z Side = " + zNeuron);
         sb.append("]");
         return sb.toString();
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((aNeuron == null) ? 0 : aNeuron.hashCode());
+        result = prime * result + ((zNeuron == null) ? 0 : zNeuron.hashCode());
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Connection other = (Connection) obj;
+        if (aNeuron == null)
+        {
+            if (other.aNeuron != null)
+                return false;
+        }
+        else if (!aNeuron.equals(other.aNeuron))
+            return false;
+        if (zNeuron == null)
+        {
+            if (other.zNeuron != null)
+                return false;
+        }
+        else if (!zNeuron.equals(other.zNeuron))
+            return false;
+        return true;
     }
 }

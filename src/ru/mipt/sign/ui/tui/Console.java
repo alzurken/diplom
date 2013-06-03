@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.swing.SwingUtilities;
 
+import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronException;
 import ru.mipt.sign.neurons.NeuronConst;
 import ru.mipt.sign.ui.gui.MainWindow;
@@ -18,11 +19,10 @@ public class Console
     {
         byte[] input = new byte[255];
         System.out.println("Sign v" + NeuronConst.VERSION + " started");
-        final MainWindow mw = new MainWindow();
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                mw.display();
+                ApplicationContext.getInstance().getMainWindow().display();
                 System.out.println("GUI started");
             }
         });
@@ -51,7 +51,7 @@ public class Console
             {
                 command.run(commandString);
                 result = command.getResult();
-                mw.display();
+                ApplicationContext.getInstance().getMainWindow().display();
             } catch (NeuronException e)
             {
                 System.out.println(e.toString());

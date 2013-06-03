@@ -6,7 +6,6 @@ import java.util.*;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
-import ru.mipt.sign.connect.Connection;
 import ru.mipt.sign.core.SObject;
 import ru.mipt.sign.neurons.functions.ActivationFunction;
 import ru.mipt.sign.neurons.functions.LogisticFunction;
@@ -14,45 +13,45 @@ import ru.mipt.sign.neurons.inner.Weights;
 
 public class Neuron extends SObject
 {
-    private List<Connection> connections;
+    private Set<Connection> connections;
     private Weights weights;
     private HashMap<Integer, Double> input;
     private HashMap<Integer, Double> output;
-    private Integer inNumber = 0;
-    private Integer currentIn = 0;
-    private Integer outNumber = 0;
-    private Integer state = NeuronConst.STATE_INIT;
-    private Integer role = NeuronConst.NORMAL_ROLE;
+    private int inNumber = 0;
+    private int currentIn = 0;
+    private int outNumber = 0;
+    private int state = NeuronConst.STATE_INIT;
+    private int role = NeuronConst.NORMAL_ROLE;
     private ActivationFunction function;
-    private Double sum = 0d;
+    private double sum = 0d;
     private HashMap<Integer, Double> delta;
 
-    public Integer getRole()
+    public int getRole()
     {
         return role;
     }
 
-    public void setRole(Integer role)
+    public void setRole(int role)
     {
         this.role = role;
     }
 
-    public Double getDelta(Integer index)
+    public double getDelta(int index)
     {
         return delta.get(index);
     }
 
-    public void setDelta(Integer index, Double delta)
+    public void setDelta(int index, double delta)
     {
         this.delta.put(index, delta);
     }
 
-    public Double getWeight(Integer i, Integer j)
+    public double getWeight(int i, int j)
     {
         return weights.getWeight(i, j);
     }
 
-    public Double getSum()
+    public double getSum()
     {
         return sum;
     }
@@ -74,7 +73,7 @@ public class Neuron extends SObject
 
     public void setInput(List<Double> inputList)
     {
-        for (Integer i = 0; i < inputList.size(); i++)
+        for (int i = 0; i < inputList.size(); i++)
         {
             addInputValue(i, inputList.get(i));
         }
@@ -90,7 +89,7 @@ public class Neuron extends SObject
         connections.remove(conn);
     }
 
-    public Integer getInNumber()
+    public int getInNumber()
     {
         return inNumber;
     }
@@ -117,14 +116,14 @@ public class Neuron extends SObject
             for (Iterator<Element> it = layers.iterator(); it.hasNext();)
             {
                 Element layer = it.next();
-                Integer input = layer.getAttribute("number").getIntValue();
+                int input = layer.getAttribute("number").getIntValue();
                 @SuppressWarnings("unchecked")
                 List<Element> items = layer.getChildren();
                 for (Iterator<Element> jt = items.iterator(); jt.hasNext();)
                 {
                     Element item = jt.next();
-                    Integer output = item.getAttribute("number").getIntValue();
-                    Double value = item.getAttribute("value").getDoubleValue();
+                    int output = item.getAttribute("number").getIntValue();
+                    double value = item.getAttribute("value").getDoubleValue();
                     weights.setWeight(input, output, value);
                 }
             }
@@ -139,19 +138,19 @@ public class Neuron extends SObject
     {
         Element neuron = new Element("neuron");
         neuron.setAttribute("id", id.toString());
-        neuron.setAttribute("inNumber", inNumber.toString());
-        neuron.setAttribute("currentIn", currentIn.toString());
-        neuron.setAttribute("outNumber", outNumber.toString());
+        neuron.setAttribute("inNumber", Integer.toString(inNumber));
+        neuron.setAttribute("currentIn", Integer.toString(currentIn));
+        neuron.setAttribute("outNumber", Integer.toString(outNumber));
 
         Element weight = new Element("weight");
-        for (Integer i = 0; i < inNumber; i++)
+        for (int i = 0; i < inNumber; i++)
         {
             Element layer = new Element("layer");
-            layer.setAttribute("number", i.toString());
-            for (Integer j = 0; j < outNumber; j++)
+            layer.setAttribute("number", Integer.toString(i));
+            for (int j = 0; j < outNumber; j++)
             {
                 Element item = new Element("item");
-                item.setAttribute("number", j.toString());
+                item.setAttribute("number", Integer.toString(j));
                 item.setAttribute("value", weights.getWeight(i, j).toString());
                 layer.addContent(item);
             }
@@ -161,7 +160,7 @@ public class Neuron extends SObject
         return neuron;
     }
 
-    public void setState(Integer state)
+    public void setState(int state)
     {
         this.state = state;
     }
@@ -177,35 +176,31 @@ public class Neuron extends SObject
     {
         input = new HashMap<Integer, Double>(inNumber);
         output = new HashMap<Integer, Double>(outNumber);
-        weights = new Weights(inNumber, outNumber)
-        {
-
-            public Double initValue()
-            {
-                Random random = new Random(System.currentTimeMillis());
-                return random.nextDouble();
-            }
-
-        };
-        connections = new ArrayList<Connection>();
+        weights = new Weights(inNumber, outNumber);
+        connections = new HashSet<Connection>();
         delta = new HashMap<Integer, Double>(outNumber);
         state = NeuronConst.STATE_INIT;
+    }
+
+    public Weights getWeights()
+    {
+        return weights;
     }
 
     public List<Integer> getUnboundOutputs(Integer fiber)
     {
         List<Integer> result = new ArrayList<Integer>();
-        for (Integer i = outNumber; i < outNumber + fiber; i++)
+        for (int i = outNumber; i < outNumber + fiber; i++)
         {
             result.add(i);
         }
         return result;
     }
 
-    public List<Integer> getUnboundInputs(Integer fiber)
+    public List<Integer> getUnboundInputs(int fiber)
     {
         List<Integer> result = new ArrayList<Integer>();
-        for (Integer i = inNumber; i < inNumber + fiber; i++)
+        for (int i = inNumber; i < inNumber + fiber; i++)
         {
             result.add(i);
         }
@@ -214,16 +209,16 @@ public class Neuron extends SObject
 
     public void calc()
     {
-        Double sum = 0.0;
-        Double[][] matrix = weights.getWeightsForCalc();
+        double sum = 0.0;
+        double[][] matrix = weights.getWeightsForCalc();
         if (function == null)
         {
             function = new LogisticFunction();
         }
-        for (Integer i = 0; i < outNumber; i++)
+        for (int i = 0; i < outNumber; i++)
         {
             sum = 0.0;
-            for (Integer j = 0; j < inNumber; j++)
+            for (int j = 0; j < inNumber; j++)
             {
                 sum += matrix[j][i] * input.get(j);
             }
@@ -234,14 +229,14 @@ public class Neuron extends SObject
         state = NeuronConst.STATE_CALCULATED;
     }
 
-    public void changeWeight(Integer i, Integer j, Double changeValue)
+    public void changeWeight(int i, int j, double changeValue)
     {
         weights.changeWeight(i, j, changeValue);
     }
 
     public void removeInputs(List<Integer> inputs)
     {
-        Integer delta = inputs.size();
+        int delta = inputs.size();
         weights.removeInputs(inputs);
         inNumber -= delta;
         input = new HashMap<Integer, Double>();
@@ -249,19 +244,19 @@ public class Neuron extends SObject
 
     public void removeOutputs(List<Integer> outputs)
     {
-        Integer delta = outputs.size();
+        int delta = outputs.size();
         weights.removeOutputs(outputs);
         outNumber -= delta;
         output = new HashMap<Integer, Double>();
     }
 
-    public Integer getState()
+    public int getState()
     {
         return state;
     }
 
     // Set input with 'index' id
-    public void addInputValue(Integer index, Double value)
+    public void addInputValue(int index, double value)
     {
         input.put(index, value);
         currentIn++;
@@ -272,7 +267,7 @@ public class Neuron extends SObject
         }
     }
 
-    public void setInNumber(Integer inNumber)
+    public void setInNumber(int inNumber)
     {
         if (this.inNumber != inNumber)
         {
@@ -296,28 +291,38 @@ public class Neuron extends SObject
         }
     }
 
-    public void addOutputs(Integer extraNumber)
+    public void addOutputs(int extraNumber)
     {
         weights.addOutputs(extraNumber);
         outNumber += extraNumber;
     }
 
-    public Integer getOutNumber()
+    public int getOutNumber()
     {
         return outNumber;
     }
 
-    public void addInputs(Integer extraNumber)
+    public void addInputs(int extraNumber)
     {
         weights.addInputs(extraNumber);
         inNumber += extraNumber;
     }
 
-    public Double getDerivative()
+    public double getDerivative()
     {
         return function.getDerivative(sum);
     }
 
+    public boolean connectedTo(BigInteger id)
+    {
+        for (Connection c : connections)
+        {
+            if (c.getZID().equals(id))
+                return true;
+        }
+        return false;
+    }
+    
     @Override
     public String toString()
     {

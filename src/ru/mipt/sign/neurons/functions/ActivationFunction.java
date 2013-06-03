@@ -2,9 +2,9 @@ package ru.mipt.sign.neurons.functions;
 
 public interface ActivationFunction
 {
-    public Double getValue(Double x);
+    public double getValue(double x);
 
-    public Double getInverseValue(Double y) ;
+    public double getInverseValue(double y) ;
     
-    public Double getDerivative(Double x);
+    public double getDerivative(double x);
 }

@@ -6,7 +6,6 @@ import java.util.*;
 import org.jdom.Element;
 
 import ru.mipt.sign.ApplicationContext;
-import ru.mipt.sign.connect.Connection;
 import ru.mipt.sign.core.SObject;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.util.ParserXml;
@@ -14,23 +13,23 @@ import ru.mipt.sign.util.ParserXml;
 public class NeuroNet
 {
     private HashMap<BigInteger, Neuron> neuroPool;
-    private HashMap<BigInteger, Connection> connPool;
+    private Set<Connection> connPool;
     private HashMap<BigInteger, Neuron> cache;
     private List<Neuron> inputNeurons; // id, number
-    private Integer inputNumber;
-    private Integer outputNumber;
+    private int inputNumber;
+    private int outputNumber;
     private List<Neuron> outputNeurons;
     private ApplicationContext appCtx;
 
     {
         neuroPool = new HashMap<BigInteger, Neuron>();
-        connPool = new HashMap<BigInteger, Connection>();
+        connPool = new HashSet<Connection>();
         cache = new HashMap<BigInteger, Neuron>();
         inputNeurons = new ArrayList<Neuron>();
         outputNeurons = new ArrayList<Neuron>();
     }
 
-    public Integer getOutputNumber()
+    public int getOutputNumber()
     {
         return outputNumber;
     }
@@ -39,7 +38,7 @@ public class NeuroNet
     {
         return new ArrayList<Neuron>(neuroPool.values());
     }
-    
+
     public List<BigInteger> getNeuronIDs()
     {
         return new ArrayList<BigInteger>(neuroPool.keySet());
@@ -47,13 +46,13 @@ public class NeuroNet
 
     public List<Connection> getConnections()
     {
-        return new ArrayList<Connection>(connPool.values());
+        return new ArrayList<Connection>(connPool);
     }
 
     public List<Connection> getConnectionsForZNeuron(BigInteger id)
     {
         List<Connection> result = new ArrayList<Connection>();
-        for (Connection c : connPool.values())
+        for (Connection c : connPool)
         {
             if (c.getZID().equals(id))
                 result.add(c);
@@ -64,7 +63,7 @@ public class NeuroNet
     public List<Connection> getConnectionsForANeuron(BigInteger id)
     {
         List<Connection> result = new ArrayList<Connection>();
-        for (Connection c : connPool.values())
+        for (Connection c : connPool)
         {
             if (c.getAID().equals(id))
                 result.add(c);
@@ -79,9 +78,9 @@ public class NeuroNet
         {
             neuronet.addContent(neuroPool.get(i).getXML());
         }
-        for (BigInteger i : connPool.keySet())
+        for (Connection c : connPool)
         {
-            neuronet.addContent(connPool.get(i).getXML());
+            neuronet.addContent(c.getXML());
         }
         Element in = new Element("input_neurons");
         for (int i = 0; i < inputNeurons.size(); i++)
@@ -104,7 +103,7 @@ public class NeuroNet
         return neuronet;
     }
 
-    public Integer getInputNumber()
+    public int getInputNumber()
     {
         return inputNumber;
     }
@@ -133,7 +132,7 @@ public class NeuroNet
     public List<Connection> getConnectionsForRefactor(Neuron neuron, Integer start, boolean aSide)
     {
         List<Connection> result = new ArrayList<Connection>();
-        for (Connection c : connPool.values())
+        for (Connection c : connPool)
         {
             if (aSide)
             {
@@ -181,7 +180,7 @@ public class NeuroNet
         }
     }
 
-    public Integer removeNeuron(BigInteger id)
+    public int removeNeuron(BigInteger id)
     {
         List<Connection> connections = this.getConnectionsForZNeuron(id);
         connections.addAll(this.getConnectionsForANeuron(id));
@@ -190,22 +189,22 @@ public class NeuroNet
             for (Connection c : connections)
             {
                 c.disconnect();
-                this.removeConnection(c.getID());
+                this.removeConnection(c);
             }
         }
         return neuroPool.remove(id) != null ? 0 : 1;
     }
 
-    public Integer removeConnection(BigInteger id)
+    public void removeConnection(Connection c)
     {
-        return connPool.remove(id) != null ? 0 : 1;
+        connPool.remove(c);
     }
 
     public void setInputNeuron(BigInteger id) throws NeuronNotFound
     {
         setInputNeuron(getNeuron(id));
     }
-    
+
     public void setInputNeuron(Neuron n) throws NeuronNotFound
     {
         inputNeurons.add(n);
@@ -213,18 +212,37 @@ public class NeuroNet
         n.setInNumber(1);
     }
 
-    public void connectNeuron(BigInteger id1, BigInteger id2, Integer fiber) throws NeuronNotFound
+    public void connectNeuron(BigInteger id1, BigInteger id2, int fiber) throws NeuronNotFound
     {
-        Connection conn = new Connection(appCtx.getNextId(), this);
-        connPool.put(conn.getID(), conn);
-        conn.connect(id1, id2, fiber);
+        Neuron n1 = getNeuron(id1);
+        Connection conn = null;
+        if (!n1.connectedTo(id2))
+        {
+            conn = new Connection(this);
+            connPool.add(conn);
+        }
+        else
+        {
+            for (Connection c : connPool)
+            {
+                if ((c.getAID().equals(id1)) && (c.getZID().equals(id2)))
+                {
+                    conn = c;
+                    break;
+                }
+            }
+        }
+        if (conn != null)
+            conn.connect(id1, id2, fiber);
     }
 
-    public NeuroNet() {
+    public NeuroNet()
+    {
 
     }
 
-    public NeuroNet(Integer inNumber, Integer outNumber, ApplicationContext appCtx) {
+    public NeuroNet(Integer inNumber, Integer outNumber, ApplicationContext appCtx)
+    {
         this();
         this.appCtx = appCtx;
         this.inputNumber = inNumber;
@@ -287,7 +305,8 @@ public class NeuroNet
         outputNumber = outputNeurons.size();
     }
 
-    public NeuroNet(ParserXml parser, ApplicationContext appCtx) throws NeuronNotFound {
+    public NeuroNet(ParserXml parser, ApplicationContext appCtx) throws NeuronNotFound
+    {
         this();
         List<Neuron> neurons = parser.getNeurons();
         this.appCtx = appCtx;
@@ -307,7 +326,7 @@ public class NeuroNet
             while (it.hasNext())
             {
                 Connection curr = it.next();
-                connPool.put(curr.getID(), curr);
+                connPool.add(curr);
             }
         }
         setInput(parser.getNeuronsByKey("input_neurons"));

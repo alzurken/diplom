@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import ru.mipt.sign.ApplicationContext;
-import ru.mipt.sign.connect.Connection;
+import ru.mipt.sign.neurons.Connection;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.neurons.Neuron;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;

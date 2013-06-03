@@ -9,6 +9,11 @@ public class GNeuron
     private Neuron neuron;
     private boolean connected;
 
+    public Neuron getNeuron()
+    {
+        return neuron;
+    }
+
     public boolean isConnected()
     {
         return connected;
@@ -29,12 +34,12 @@ public class GNeuron
     {
         return neuron.getID();
     }
-    
+
     public Integer getRole()
     {
         return neuron.getRole();
     }
-    
+
     @Override
     public String toString()
     {

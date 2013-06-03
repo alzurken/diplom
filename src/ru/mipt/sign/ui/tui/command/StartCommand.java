@@ -1,8 +1,7 @@
 package ru.mipt.sign.ui.tui.command;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,8 +15,17 @@ public class StartCommand extends Command
     @Override
     public void run(String command, PrintStream out) throws NeuronException
     {
-
-        ApplicationContext.getInstance().getManager().start();
+        Long numberOfSteps;
+        String[] temp = command.split(" ");
+        if (temp.length == 1)
+        {
+            numberOfSteps = 1000l;
+        }
+        else
+        {
+            numberOfSteps = Long.valueOf(temp[1]);
+        }
+        ApplicationContext.getInstance().getManager().start(numberOfSteps);
 
     }
 

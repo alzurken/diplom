@@ -8,6 +8,7 @@ import java.util.List;
 import ru.mipt.sign.facade.NeuroManager;
 import ru.mipt.sign.forex.Bar;
 import ru.mipt.sign.neurons.NeuroNet;
+import ru.mipt.sign.ui.gui.MainWindow;
 
 public class ApplicationContext
 {
@@ -19,6 +20,7 @@ public class ApplicationContext
     private NeuroManager manager;
     private PrintStream out;
     private static ApplicationContext instance = new ApplicationContext();
+    private final MainWindow mainWindow;
     
     public static ApplicationContext getInstance()
     {
@@ -27,10 +29,15 @@ public class ApplicationContext
     
     private ApplicationContext()
     {
-        
+        mainWindow = new MainWindow();
     }
     
     
+    public MainWindow getMainWindow()
+    {
+        return mainWindow;
+    }
+
     public PrintStream getOut()
     {
         return out;

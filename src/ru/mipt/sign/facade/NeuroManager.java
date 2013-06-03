@@ -18,57 +18,54 @@ import ru.mipt.sign.neurons.NeuroNet;
 
 public class NeuroManager
 {
+    private Random random;
 
-    public void start() throws NeuronNotFound
+    public void start(Long numberOfSteps) throws NeuronNotFound
     {
         ApplicationContext appCtx = ApplicationContext.getInstance();
         NeuroNet nn = appCtx.getNeuroNet();
         List<Bar> in = appCtx.getData();
-        List<Double> forCompare = new ArrayList<Double>();
+        List<Double> result = new ArrayList<Double>();
         List<Double> rightResult = new ArrayList<Double>();
-        System.out.println("Start processing bars: \n");
+        // System.out.println("Start processing bars: \n");
 
         FileOutputStream fos;
+        random = new Random(System.currentTimeMillis());
         try
         {
-            fos = new FileOutputStream("log.txt", false);
-            PrintStream out = new PrintStream(fos);
-            long maxSteps = 10000;
-            long step = 0;
-            long lostSteps = 0;
-            for (long s = 0; s < maxSteps; s++)
+            for (long s = 0; s < numberOfSteps; s++)
             {
-                step++;
-                Double x = Math.random()*2*Math.PI;
+                // step++;
+                Double x = random.nextDouble() * 15;
                 List input = Collections.singletonList(x);
                 nn.nextInput(input);
                 nn.calc();
-                forCompare = nn.getResult();
+                result = nn.getResult();
                 rightResult = Collections.singletonList(testFunction(x));
-                Double accuracy = getAccuracy(forCompare, rightResult).get(0);
-                if (Math.abs(100 - accuracy) < 10)
-                {
-                //out.println("Step: " + step + " Lost: " + lostSteps  + " Accuracy: "  + accuracy);
-                }
-                else
-                {
-                    lostSteps++;
-                }
-              //  learn(nn, forCompare, rightResult);         
+                Double accuracy = getAccuracy(result, rightResult).get(0);
+                if (numberOfSteps < 100l)
+                    System.out.println("x: " + x + " right: " + testFunction(x) + " result: " + result + " accuracy: "
+                            + accuracy);
+                learn(nn, result, rightResult);
             }
-            long predict = 1000;
-            double dx = 0.01;
-            for (long s = 0; s< predict; s++)
+            if (numberOfSteps > 100)
             {
-                Double x = s*dx;
-                List input = Collections.singletonList(x);
-                nn.nextInput(input);
-                nn.calc();
-                Double result = nn.getResult().get(0);
-                DecimalFormat df = new DecimalFormat("###.######");
-                out.println(df.format(x) + "\t" + df.format(result));
+                fos = new FileOutputStream("log.txt", false);
+                PrintStream out = new PrintStream(fos);
+                long predict = 1000;
+                double dx = 0.01;
+                for (long s = 0; s < predict; s++)
+                {
+                    Double x = s * dx;
+                    List input = Collections.singletonList(x);
+                    nn.nextInput(input);
+                    nn.calc();
+                    Double predictedResult = nn.getResult().get(0);
+                    DecimalFormat df = new DecimalFormat("###.######");
+                    out.println(df.format(x) + "\t" + df.format(predictedResult));
+                }
+                fos.close();
             }
-            fos.close();
         } catch (FileNotFoundException e)
         {
             // TODO Auto-generated catch block
@@ -78,13 +75,14 @@ public class NeuroManager
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        System.out.println("\nStop processing bars.");
+
+        if (numberOfSteps > 100l)
+            System.out.println("\nStop processing bars.");
     }
 
     private Double testFunction(Double x)
     {
-        return 0.5*(Math.sin(x) + 1);
+        return 0.5 * Math.sin(x);
     }
 
     private List<Double> getAccuracy(List<Double> actual, List<Double> right)
@@ -101,34 +99,7 @@ public class NeuroManager
     {
         if (result.size() == 0)
             return;
-        LearningCenter lc = new LearningCenter();
-        Random rnd = new Random();
-        Integer type = rnd.nextInt(30);
-        if (type < 50)
-        {
-
-            /*lc.learn(nn, result, rightValue, LearningCenter.TYPE_WEIGHT);
-            nn.nextInput(new ArrayList(nn.getNeuron(new BigInteger("1")).getInput().values()));
-            nn.calc();
-            List<Double> newResult = nn.getResult();
-            System.out.println("Previous: " + result + " Current: " + newResult + " Right: " + rightValue);*/
-
-            // System.out.println(lc.getMessage());
-        }
-        else if (type < 60)
-        {
-            lc.learn(nn, result, rightValue, LearningCenter.TYPE_DISCONNECT);
-            System.out.println(lc.getMessage());
-        }
-        else if (type < 85)
-        {
-            lc.learn(nn, result, rightValue, LearningCenter.TYPE_CONNECT);
-            System.out.println(lc.getMessage());
-        }
-        else
-        {
-            lc.learn(nn, result, rightValue, LearningCenter.TYPE_CREATE);
-            System.out.println(lc.getMessage());
-        }
+        LearningCenter lc = new LearningCenter(LearningCenter.TYPE_ALL);
+        lc.learn(nn, result, rightValue);
     }
 }

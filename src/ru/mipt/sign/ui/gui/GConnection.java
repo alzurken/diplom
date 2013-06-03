@@ -1,8 +1,6 @@
 package ru.mipt.sign.ui.gui;
 
-import java.math.BigInteger;
-
-import ru.mipt.sign.connect.Connection;
+import ru.mipt.sign.neurons.Connection;
 
 public class GConnection
 {
@@ -12,9 +10,5 @@ public class GConnection
         super();
         this.connection = connection;
     }
-    
-    public BigInteger getID()
-    {
-        return connection.getID();
-    }
+
 }
