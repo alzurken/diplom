@@ -11,8 +11,6 @@ import org.jdom.output.XMLOutputter;
 
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.core.exceptions.NextCommandException;
-import ru.mipt.sign.data.ImportData;
-import ru.mipt.sign.data.impl.ImportDataInput;
 import ru.mipt.sign.facade.NeuroManager;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.neurons.NeuronConst;
@@ -59,9 +57,7 @@ public class ConfigurationManager
         ApplicationContext appCtx = ApplicationContext.getInstance();
         appCtx.setCurrentID(parser.getCurrentID());
         appCtx.setOut(System.out);
-        ImportData id = new ImportDataInput();
-        appCtx.setData(id.getData(DATA_PATH));
-        NeuroNet nn = new NeuroNet(parser, appCtx);
+        NeuroNet nn = new NeuroNet(parser);
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
 
@@ -84,9 +80,7 @@ public class ConfigurationManager
         ApplicationContext appCtx = ApplicationContext.getInstance();
         appCtx.setCurrentID(BigInteger.ZERO);
         appCtx.setOut(System.out);
-        ImportData id = new ImportDataInput();
-        appCtx.setData(id.getData(DATA_PATH));
-        NeuroNet nn = new NeuroNet(inNumber, outNumber, appCtx);
+        NeuroNet nn = new NeuroNet(inNumber, outNumber);
         try
         {
             nn.setInputNeuron(BigInteger.ONE);

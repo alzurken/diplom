@@ -19,11 +19,10 @@ import ru.mipt.sign.core.exceptions.NextCommandException;
 import ru.mipt.sign.neurons.Connection;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.neurons.Neuron;
+import ru.mipt.sign.neurons.factory.NeuronFactory;
 
 public class ParserXml
 {
-
-    NeuroNet net = new NeuroNet();
     Document doc;
 
     public BigInteger getCurrentID()
@@ -56,7 +55,8 @@ public class ParserXml
         return 0;
     }
 
-    public ParserXml(String path) throws NextCommandException {
+    public ParserXml(String path) throws NextCommandException
+    {
         if (!path.isEmpty())
         {
             SAXBuilder builder = new SAXBuilder();
@@ -153,7 +153,7 @@ public class ParserXml
             {
                 for (Iterator<Element> it = results.iterator(); it.hasNext();)
                 {
-                    neurons.add(new Neuron(it.next()));
+                    neurons.add(NeuronFactory.newNeuron(it.next()).create());
                 }
             }
         } catch (JDOMException e)

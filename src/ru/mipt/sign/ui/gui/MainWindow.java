@@ -8,9 +8,9 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import ru.mipt.sign.ui.gui.listeners.ButtonListener;
+import ru.mipt.sign.ui.gui.menu.WeightsTable;
 import ru.mipt.sign.ui.gui.plugins.MousePlugin;
 import ru.mipt.sign.ui.gui.plugins.VertexMenu;
-import ru.mipt.sign.ui.gui.plugins.WeightsTable;
 import ru.mipt.sign.ui.gui.transformers.LabelTransformer;
 import ru.mipt.sign.ui.gui.transformers.NeuronTransformer;
 import edu.uci.ics.jung.algorithms.layout.ISOMLayout;

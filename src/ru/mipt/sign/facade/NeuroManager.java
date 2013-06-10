@@ -12,39 +12,44 @@ import java.util.Random;
 
 import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
-import ru.mipt.sign.forex.Bar;
+import ru.mipt.sign.data.impl.InputDataProviderByNeuron;
 import ru.mipt.sign.learn.LearningCenter;
 import ru.mipt.sign.neurons.NeuroNet;
 
 public class NeuroManager
 {
-    private Random random;
+    private final Random random = new Random(System.currentTimeMillis());
 
     public void start(Long numberOfSteps) throws NeuronNotFound
     {
         ApplicationContext appCtx = ApplicationContext.getInstance();
         NeuroNet nn = appCtx.getNeuroNet();
-        List<Bar> in = appCtx.getData();
         List<Double> result = new ArrayList<Double>();
         List<Double> rightResult = new ArrayList<Double>();
         // System.out.println("Start processing bars: \n");
 
         FileOutputStream fos;
-        random = new Random(System.currentTimeMillis());
         try
         {
+            nn.setInputProvider(new InputDataProviderByNeuron()
+            {
+                
+                @Override
+                public List<Double> nextValue()
+                {
+                    double x = Double.valueOf(random.nextDouble() * 10).intValue();
+                    List<Double> input = Collections.singletonList(x);
+                    return input;
+                }
+            });
             for (long s = 0; s < numberOfSteps; s++)
             {
-                // step++;
-                Double x = random.nextDouble() * 15;
-                List input = Collections.singletonList(x);
-                nn.nextInput(input);
                 nn.calc();
                 result = nn.getResult();
-                rightResult = Collections.singletonList(testFunction(x));
+                rightResult = nn.getCurrentInput();
                 Double accuracy = getAccuracy(result, rightResult).get(0);
                 if (numberOfSteps < 100l)
-                    System.out.println("x: " + x + " right: " + testFunction(x) + " result: " + result + " accuracy: "
+                    System.out.println("x: " + rightResult.get(0) + " right: " + testFunction(rightResult.get(0)) + " result: " + result + " accuracy: "
                             + accuracy);
                 learn(nn, result, rightResult);
             }
@@ -58,7 +63,6 @@ public class NeuroManager
                 {
                     Double x = s * dx;
                     List input = Collections.singletonList(x);
-                    nn.nextInput(input);
                     nn.calc();
                     Double predictedResult = nn.getResult().get(0);
                     DecimalFormat df = new DecimalFormat("###.######");
@@ -76,13 +80,13 @@ public class NeuroManager
             e.printStackTrace();
         }
 
-        if (numberOfSteps > 100l)
+        if (numberOfSteps > 1l)
             System.out.println("\nStop processing bars.");
     }
 
     private Double testFunction(Double x)
     {
-        return 0.5 * Math.sin(x);
+        return 0.1 * x;
     }
 
     private List<Double> getAccuracy(List<Double> actual, List<Double> right)

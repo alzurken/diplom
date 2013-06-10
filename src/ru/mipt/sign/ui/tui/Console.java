@@ -39,7 +39,7 @@ public class Console
             }
             String commandString = new String(input);
             commandString = commandString.substring(0, commandString.indexOf("\r\n"));
-
+            commandString = commandString.trim();
             Command command = CommandFactory.INSTANCE.getCommand(commandString);
 
             if (command == null)

@@ -2,11 +2,8 @@ package ru.mipt.sign;
 
 import java.io.PrintStream;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 import ru.mipt.sign.facade.NeuroManager;
-import ru.mipt.sign.forex.Bar;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.ui.gui.MainWindow;
 
@@ -16,7 +13,6 @@ public class ApplicationContext
     private BigInteger last_added_id;
     private BigInteger last_removed_id;
     private NeuroNet net;
-    private List<Bar> data = new ArrayList<Bar>();
     private NeuroManager manager;
     private PrintStream out;
     private static ApplicationContext instance = new ApplicationContext();
@@ -91,16 +87,6 @@ public class ApplicationContext
     public NeuroNet getNeuroNet()
     {
         return net;
-    }
-
-    public List<Bar> getData()
-    {
-        return data;
-    }
-
-    public void setData(List<Bar> data)
-    {
-        this.data = data;
     }
 
     public BigInteger getNextId()

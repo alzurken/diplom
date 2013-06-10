@@ -25,7 +25,6 @@ public class DisconnectAction extends LearningAction
         List<Connection> connections = nn.getConnectionsForZNeuron(id);
         if (connections.size() > 1)
         {
-            connections.get(0).disconnect();
             nn.removeConnection(connections.get(0));
             this.message = "Disconnected from " + id + " to " + connections.get(0).getAID();
         }

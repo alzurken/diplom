@@ -1,15 +1,19 @@
 package ru.mipt.sign.learn;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.neurons.Connection;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.neurons.Neuron;
+import ru.mipt.sign.util.comparator.NeuronComparator;
 
 public class WeightAction extends LearningAction
 {
-    double eta = 0.8;
+    double eta = 0.1;
 
     public WeightAction(NeuroNet nn, List result, List rightValue)
     {
@@ -23,13 +27,13 @@ public class WeightAction extends LearningAction
         for (int i = 0; i < lastNeurons.size(); i++)
         {
             Neuron n = lastNeurons.get(i);
-            Double out = n.getOutput().get(0);
-            Double delta = (out - (Double) rightValue.get(i)) * n.getDerivative();
+            double out = n.getOutput().get(0);
+            double delta = (out - (Double) rightValue.get(i)) * n.getDerivative();
             n.setDelta(0, delta); // TODO for 1 output only, refactor
             Map<Integer, Double> input = n.getInput();
             for (int j = 0; j < n.getInNumber(); j++)
             {
-                Double deltaWeight = -eta * input.get(j) * delta;
+                double deltaWeight = -eta * input.get(j) * delta;
                 n.changeWeight(j, 0, deltaWeight);
             }
         }
@@ -82,12 +86,4 @@ public class WeightAction extends LearningAction
         return neuronSet;
     }
     
-    private class NeuronComparator implements Comparator<Neuron>
-    {
-        @Override
-        public int compare(Neuron n1, Neuron n2)
-        {
-            return n1.compareTo(n2);
-        }
-    };
 }

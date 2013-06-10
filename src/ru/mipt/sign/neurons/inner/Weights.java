@@ -5,20 +5,20 @@ import java.util.*;
 public class Weights
 {
     private Map<Integer, Map<Integer, Double>> weights;
-    private int inputNumber;
-    private int outputNumber;
+    private int inNumber;
+    private int outNumber;
     private Random random;
 
-    public Weights(Integer inputNumber, Integer outputNumber)
+    public Weights(Integer inNumber, Integer outNumber)
     {
-        this.inputNumber = inputNumber;
-        this.outputNumber = outputNumber;
+        this.inNumber = inNumber;
+        this.outNumber = outNumber;
         weights = new HashMap<Integer, Map<Integer, Double>>();
         random = new Random(System.currentTimeMillis());
-        for (int i = 0; i < inputNumber; i++)
+        for (int i = 0; i < inNumber; i++)
         {
             weights.put(i, new HashMap<Integer, Double>());
-            for (int j = 0; j < outputNumber; j++)
+            for (int j = 0; j < outNumber; j++)
             {
                 weights.get(i).put(j, initValue());
             }
@@ -27,10 +27,10 @@ public class Weights
 
     public double[][] getWeightsForCalc()
     {
-        double[][] result = new double[inputNumber][outputNumber];
-        for (int i = 0; i < inputNumber; i++)
+        double[][] result = new double[inNumber][outNumber];
+        for (int i = 0; i < inNumber; i++)
         {
-            for (int j = 0; j < outputNumber; j++)
+            for (int j = 0; j < outNumber; j++)
             {
                 result[i][j] = weights.get(i).get(j);
             }
@@ -40,11 +40,11 @@ public class Weights
     
     public Double[][] getWeightsForShow()
     {
-        Double[][] result = new Double[inputNumber][outputNumber + 1];
-        for (int i = 0; i < inputNumber; i++)
+        Double[][] result = new Double[inNumber][outNumber + 1];
+        for (int i = 0; i < inNumber; i++)
         {
             result[i][0] = Double.valueOf(i);
-            for (int j = 0; j < outputNumber; j++)
+            for (int j = 0; j < outNumber; j++)
             {
                 result[i][j+1] = weights.get(i).get(j);
             }
@@ -54,27 +54,27 @@ public class Weights
 
     public void addInputs(Integer extraNumber)
     {
-        for (int i = inputNumber; i < inputNumber + extraNumber; i++)
+        for (int i = inNumber; i < inNumber + extraNumber; i++)
         {
             weights.put(i, new HashMap<Integer, Double>());
-            for (int j = 0; j < outputNumber; j++)
+            for (int j = 0; j < outNumber; j++)
             {
                 weights.get(i).put(j, initValue());
             }
         }
-        inputNumber += extraNumber;
+        inNumber += extraNumber;
     }
 
     public void addOutputs(Integer extraNumber)
     {
-        for (int i = 0; i < inputNumber; i++)
+        for (int i = 0; i < inNumber; i++)
         {
-            for (int j = outputNumber; j < outputNumber + extraNumber; j++)
+            for (int j = outNumber; j < outNumber + extraNumber; j++)
             {
                 weights.get(i).put(j, initValue());
             }
         }
-        outputNumber += extraNumber;
+        outNumber += extraNumber;
     }
 
     public void changeWeight(int input, int output, double value)
@@ -111,12 +111,12 @@ public class Weights
         {
             weights.remove(i);
         }
-        for (int i = min + delta; i < inputNumber; i++)
+        for (int i = min + delta; i < inNumber; i++)
         {
             weights.put(i - delta, weights.get(i));
             weights.remove(i);
         }
-        inputNumber -= delta;
+        inNumber -= delta;
     }
 
     public void removeOutputs(List<Integer> outputs)
@@ -124,29 +124,43 @@ public class Weights
         int delta = outputs.size();
         int min = Collections.min(outputs);
 
-        for (int i = 0; i < inputNumber; i++)
+        for (int i = 0; i < inNumber; i++)
         {
             for (int j = min; j < min + delta; j++)
             {
                 weights.get(i).remove(j);
             }
-            for (int j = min + delta; j < outputNumber; j++)
+            for (int j = min + delta; j < outNumber; j++)
             {
                 weights.get(i).put(j - delta, weights.get(i).get(j));
                 weights.get(i).remove(j);
             }
         }
-        outputNumber -= delta;
+        outNumber -= delta;
     }
 
     public void setInNumber(int inNumber)
     {
-        this.inputNumber = inNumber;
+        this.inNumber = inNumber;
         weights = new HashMap<Integer, Map<Integer, Double>>();
-        for (int i = 0; i < inputNumber; i++)
+        for (int i = 0; i < this.inNumber; i++)
         {
             weights.put(i, new HashMap<Integer, Double>());
-            for (int j = 0; j < outputNumber; j++)
+            for (int j = 0; j < outNumber; j++)
+            {
+                weights.get(i).put(j, initValue());
+            }
+        }
+    }
+    
+    public void setOutNumber(int outNumber)
+    {
+        this.outNumber = outNumber;
+        weights = new HashMap<Integer, Map<Integer, Double>>();
+        for (int i = 0; i < this.inNumber; i++)
+        {
+            weights.put(i, new HashMap<Integer, Double>());
+            for (int j = 0; j < this.outNumber; j++)
             {
                 weights.get(i).put(j, initValue());
             }
@@ -155,7 +169,17 @@ public class Weights
 
     public Double initValue()
     {
-        return random.nextDouble();
+        return random.nextDouble()*0.1;
+    }
+
+    public int getInNumber()
+    {
+        return inNumber;
+    }
+
+    public int getOutNumber()
+    {
+        return outNumber;
     }
 
 }

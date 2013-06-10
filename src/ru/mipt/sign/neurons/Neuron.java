@@ -3,28 +3,48 @@ package ru.mipt.sign.neurons;
 import java.math.BigInteger;
 import java.util.*;
 
-import org.jdom.DataConversionException;
 import org.jdom.Element;
 
-import ru.mipt.sign.core.SObject;
 import ru.mipt.sign.neurons.functions.ActivationFunction;
 import ru.mipt.sign.neurons.functions.LogisticFunction;
 import ru.mipt.sign.neurons.inner.Weights;
 
-public class Neuron extends SObject
+public class Neuron implements Comparable<Neuron>
 {
+    private BigInteger id;
+    private Element image;
+
     private Set<Connection> connections;
     private Weights weights;
     private HashMap<Integer, Double> input;
     private HashMap<Integer, Double> output;
-    private int inNumber = 0;
     private int currentIn = 0;
-    private int outNumber = 0;
     private int state = NeuronConst.STATE_INIT;
     private int role = NeuronConst.NORMAL_ROLE;
+    private int order;
     private ActivationFunction function;
     private double sum = 0d;
     private HashMap<Integer, Double> delta;
+
+    public void setOrder(int order)
+    {
+        this.order = order;
+    }
+
+    public int getOrder()
+    {
+        return order;
+    }
+
+    public Element getImage()
+    {
+        return image;
+    }
+
+    public void setImage(Element image)
+    {
+        this.image = image;
+    }
 
     public int getRole()
     {
@@ -61,6 +81,11 @@ public class Neuron extends SObject
         return function;
     }
 
+    public void setFunction(ActivationFunction function)
+    {
+        this.function = function;
+    }
+
     public HashMap<Integer, Double> getInput()
     {
         return input;
@@ -91,7 +116,16 @@ public class Neuron extends SObject
 
     public int getInNumber()
     {
-        return inNumber;
+        return weights.getInNumber();
+    }
+
+    public void setOutNumber(int outNumber)
+    {
+        if (weights.getOutNumber() != outNumber)
+        {
+            output = new HashMap<Integer, Double>(outNumber);
+            weights.setOutNumber(outNumber);
+        }
     }
 
     public void randomize()
@@ -99,65 +133,11 @@ public class Neuron extends SObject
         weights.randomize();
     }
 
-    public Neuron(Element elem)
+    public Neuron(BigInteger id, Element elem, Weights weights)
     {
-        super(elem);
-        Element neuron = elem;
-        try
-        {
-            this.inNumber = neuron.getAttribute("inNumber").getIntValue();
-            this.currentIn = neuron.getAttribute("currentIn").getIntValue();
-            this.outNumber = neuron.getAttribute("outNumber").getIntValue();
-            init();
-
-            Element weight = neuron.getChild("weight");
-            @SuppressWarnings("unchecked")
-            List<Element> layers = weight.getChildren();
-            for (Iterator<Element> it = layers.iterator(); it.hasNext();)
-            {
-                Element layer = it.next();
-                int input = layer.getAttribute("number").getIntValue();
-                @SuppressWarnings("unchecked")
-                List<Element> items = layer.getChildren();
-                for (Iterator<Element> jt = items.iterator(); jt.hasNext();)
-                {
-                    Element item = jt.next();
-                    int output = item.getAttribute("number").getIntValue();
-                    double value = item.getAttribute("value").getDoubleValue();
-                    weights.setWeight(input, output, value);
-                }
-            }
-        } catch (DataConversionException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public Element getXML()
-    {
-        Element neuron = new Element("neuron");
-        neuron.setAttribute("id", id.toString());
-        neuron.setAttribute("inNumber", Integer.toString(inNumber));
-        neuron.setAttribute("currentIn", Integer.toString(currentIn));
-        neuron.setAttribute("outNumber", Integer.toString(outNumber));
-
-        Element weight = new Element("weight");
-        for (int i = 0; i < inNumber; i++)
-        {
-            Element layer = new Element("layer");
-            layer.setAttribute("number", Integer.toString(i));
-            for (int j = 0; j < outNumber; j++)
-            {
-                Element item = new Element("item");
-                item.setAttribute("number", Integer.toString(j));
-                item.setAttribute("value", weights.getWeight(i, j).toString());
-                layer.addContent(item);
-            }
-            weight.addContent(layer);
-        }
-        neuron.addContent(weight);
-        return neuron;
+        this.id = id;
+        this.image = elem;
+        this.weights = weights;
     }
 
     public void setState(int state)
@@ -167,18 +147,15 @@ public class Neuron extends SObject
 
     public Neuron(BigInteger id)
     {
-        super(id);
-
-        init();
+        this.id = id;
     }
 
-    private void init()
     {
-        input = new HashMap<Integer, Double>(inNumber);
-        output = new HashMap<Integer, Double>(outNumber);
-        weights = new Weights(inNumber, outNumber);
+        input = new HashMap<Integer, Double>();
+        output = new HashMap<Integer, Double>();
+        weights = new Weights(0, 0);
         connections = new HashSet<Connection>();
-        delta = new HashMap<Integer, Double>(outNumber);
+        delta = new HashMap<Integer, Double>();
         state = NeuronConst.STATE_INIT;
     }
 
@@ -190,6 +167,7 @@ public class Neuron extends SObject
     public List<Integer> getUnboundOutputs(Integer fiber)
     {
         List<Integer> result = new ArrayList<Integer>();
+        int outNumber = weights.getOutNumber();
         for (int i = outNumber; i < outNumber + fiber; i++)
         {
             result.add(i);
@@ -200,6 +178,7 @@ public class Neuron extends SObject
     public List<Integer> getUnboundInputs(int fiber)
     {
         List<Integer> result = new ArrayList<Integer>();
+        int inNumber = weights.getInNumber();
         for (int i = inNumber; i < inNumber + fiber; i++)
         {
             result.add(i);
@@ -215,6 +194,8 @@ public class Neuron extends SObject
         {
             function = new LogisticFunction();
         }
+        int outNumber = weights.getOutNumber();
+        int inNumber = weights.getInNumber();
         for (int i = 0; i < outNumber; i++)
         {
             sum = 0.0;
@@ -238,7 +219,6 @@ public class Neuron extends SObject
     {
         int delta = inputs.size();
         weights.removeInputs(inputs);
-        inNumber -= delta;
         input = new HashMap<Integer, Double>();
     }
 
@@ -246,7 +226,6 @@ public class Neuron extends SObject
     {
         int delta = outputs.size();
         weights.removeOutputs(outputs);
-        outNumber -= delta;
         output = new HashMap<Integer, Double>();
     }
 
@@ -260,7 +239,7 @@ public class Neuron extends SObject
     {
         input.put(index, value);
         currentIn++;
-        if ((currentIn == inNumber))
+        if ((currentIn == weights.getInNumber()))
         {
             state = NeuronConst.STATE_READY;
             currentIn = 0;
@@ -269,15 +248,13 @@ public class Neuron extends SObject
 
     public void setInNumber(int inNumber)
     {
-        if (this.inNumber != inNumber)
+        if (weights.getInNumber() != inNumber)
         {
             input = new HashMap<Integer, Double>(inNumber);
-            this.inNumber = inNumber;
             weights.setInNumber(inNumber);
         }
     }
 
-    @Override
     public String getType()
     {
         return "neuron";
@@ -294,18 +271,16 @@ public class Neuron extends SObject
     public void addOutputs(int extraNumber)
     {
         weights.addOutputs(extraNumber);
-        outNumber += extraNumber;
     }
 
     public int getOutNumber()
     {
-        return outNumber;
+        return weights.getOutNumber();
     }
 
     public void addInputs(int extraNumber)
     {
         weights.addInputs(extraNumber);
-        inNumber += extraNumber;
     }
 
     public double getDerivative()
@@ -322,7 +297,12 @@ public class Neuron extends SObject
         }
         return false;
     }
-    
+
+    public BigInteger getID()
+    {
+        return id;
+    }
+
     @Override
     public String toString()
     {
@@ -334,4 +314,29 @@ public class Neuron extends SObject
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Neuron other = (Neuron) obj;
+        if (id == null)
+        {
+            if (other.id != null)
+                return false;
+        }
+        else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int compareTo(Neuron neuron)
+    {
+        return -id.compareTo(neuron.getID());
+    }
 }
