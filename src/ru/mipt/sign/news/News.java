@@ -1,17 +1,8 @@
 package ru.mipt.sign.news;
 
-import java.math.BigInteger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
 
-import org.jdom.DataConversionException;
 import org.jdom.Element;
-
-import ru.mipt.sign.core.SObject;
 
 public class News  implements INews
 {

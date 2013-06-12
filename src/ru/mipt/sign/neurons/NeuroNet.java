@@ -10,32 +10,31 @@ import ru.mipt.sign.core.exceptions.CalculationException;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.data.InputDataProvider;
 import ru.mipt.sign.neurons.factory.NeuronFactory;
-import ru.mipt.sign.neurons.inner.DefaultCalculator;
-import ru.mipt.sign.neurons.inner.NeuroNetCalculator;
+import ru.mipt.sign.neurons.functions.UnitFunction;
+import ru.mipt.sign.neurons.inner.UnitWeights;
+import ru.mipt.sign.util.Log;
 import ru.mipt.sign.util.ParserXml;
 import ru.mipt.sign.util.comparator.OrderComparator;
 
 public class NeuroNet
 {
-    private HashMap<BigInteger, Neuron> neuroPool;
+    private BigInteger currentID;
+    protected HashMap<BigInteger, Neuron> neuroPool;
     private Set<Connection> connPool;
-    private TreeSet<Neuron> inputNeurons; // id, number
-    private int inputNumber;
-    private int outputNumber;
-    private TreeSet<Neuron> outputNeurons;
-    private NeuroNetCalculator calculator;
-    private InputDataProvider inputProvider;
+    protected TreeSet<Neuron> inputNeurons; // id, number
+    protected int inputNumber;
+    protected int outputNumber;
+    protected TreeSet<Neuron> outputNeurons;
+    protected InputDataProvider inputProvider;
+    private List<Double> currentInput;
 
     {
+        currentID = BigInteger.valueOf(0);
         neuroPool = new HashMap<BigInteger, Neuron>();
         connPool = new HashSet<Connection>();
         inputNeurons = new TreeSet<Neuron>(new OrderComparator());
         outputNeurons = new TreeSet<Neuron>(new OrderComparator());
-    }
-
-    public void setCalclulator(NeuroNetCalculator calclulator)
-    {
-        this.calculator = calclulator;
+        currentInput = new ArrayList<Double>();
     }
 
     public int getOutputNumber()
@@ -118,7 +117,8 @@ public class NeuroNet
         for (Neuron n : outputNeurons)
         {
             Map<Integer, Double> out = n.getOutput();
-            result.add(out.get(0));
+            Double value = out.get(0);
+            result.add(value == null ? 0d : value);
         }
         return result;
     }
@@ -200,8 +200,10 @@ public class NeuroNet
     {
         inputNeurons.add(n);
         n.setRole(NeuronConst.INPUT_ROLE);
-        n.setOrder(inputNeurons.size() + 1);
+        n.setFunction(new UnitFunction());
         n.setInNumber(1);
+        n.setWeights(new UnitWeights(1, n.getOutNumber()));
+        n.setOrder(inputNeurons.size() + 1);
     }
 
     public void connectNeuron(BigInteger id1, BigInteger id2, int fiber) throws NeuronNotFound
@@ -228,6 +230,11 @@ public class NeuroNet
             conn.connect(id1, id2, fiber);
     }
 
+    public NeuroNet()
+    {
+        
+    }
+    
     public NeuroNet(Integer inNumber, Integer outNumber)
     {
         this.inputNumber = inNumber;
@@ -235,7 +242,15 @@ public class NeuroNet
         for (int i = 0; i < inputNumber; i++)
         {
             BigInteger id = ApplicationContext.getInstance().getNextId();
-            neuroPool.put(id, new Neuron(id));
+            Neuron inputNeuron = new Neuron(id);
+            neuroPool.put(id, inputNeuron);
+            try
+            {
+                setInputNeuron(inputNeuron);
+            } catch (NeuronNotFound e)
+            {
+                System.out.println("There is no neuron with id = " + e.getId());
+            }
         }
         for (int i = 0; i < outputNumber; i++)
         {
@@ -316,11 +331,17 @@ public class NeuroNet
 
     public BigInteger addNeuron()
     {
-        BigInteger id = ApplicationContext.getInstance().getNextId();
+        BigInteger id = getNextId();
         neuroPool.put(id, new Neuron(id));
         return id;
     }
 
+    protected BigInteger getNextId()
+    {
+        currentID = currentID.add(BigInteger.valueOf(1));
+        return currentID;
+    }
+    
     public Neuron getNeuron(BigInteger id) throws NeuronNotFound
     {
         if (neuroPool.get(id) == null)
@@ -332,28 +353,63 @@ public class NeuroNet
 
     public List<Double> getCurrentInput()
     {
-        return inputProvider.getCurrentInput();
+        return currentInput;
     }
-    
+
     public void calc() throws NeuronNotFound
     {
         if (inputProvider == null)
-            throw new CalculationException("InputDataProvider is null. Please, set InputDataProvider before any calculations");
+            throw new CalculationException(
+                    "InputDataProvider is null. Please, set InputDataProvider before any calculations");
         for (Iterator<Neuron> it = this.neuroPool.values().iterator(); it.hasNext();)
         {
             Neuron n = it.next();
             n.setState(NeuronConst.STATE_INIT);
         }
+        currentInput = new ArrayList<Double>();
         for (Iterator<Neuron> it = this.inputNeurons.iterator(); it.hasNext();)
         {
             Neuron n = it.next();
-            n.setInput(inputProvider.getNextInput());
+            List<Double> temp = inputProvider.getNextInput();
+            currentInput.addAll(temp);
+            Log.debug("temp : " + temp);
+            Log.debug("currentInput: " + currentInput);
+            n.setInput(temp);
         }
-        if (calculator == null)
+        HashMap<BigInteger, Neuron> cache = new HashMap<BigInteger, Neuron>();
+        for (BigInteger k : neuroPool.keySet())
         {
-            calculator = new DefaultCalculator();
+            Neuron so = neuroPool.get(k);
+            Neuron n = (Neuron) so;
+            if (n.getState() == NeuronConst.STATE_READY)
+            {
+                n.calc();
+                n.emit();
+            }
+            if (n.getState() == NeuronConst.STATE_INIT)
+            {
+                cache.put(n.getID(), n);
+            }
         }
-        calculator.calc(neuroPool);
+        while (!cache.isEmpty())
+        {
+            HashMap<BigInteger, Neuron> bufferCache = new HashMap<BigInteger, Neuron>();
+            Iterator<Neuron> it = cache.values().iterator();
+            while (it.hasNext())
+            {
+                Neuron n = it.next();
+                if (n.getState() == NeuronConst.STATE_READY)
+                {
+                    n.calc();
+                    n.emit();
+                }
+                else
+                {
+                    bufferCache.put(n.getID(), n);
+                }
+            }
+            cache = bufferCache;
+        }
     }
 
     public void setInputProvider(InputDataProvider inputProvider)

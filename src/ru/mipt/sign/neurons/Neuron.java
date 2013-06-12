@@ -6,7 +6,7 @@ import java.util.*;
 import org.jdom.Element;
 
 import ru.mipt.sign.neurons.functions.ActivationFunction;
-import ru.mipt.sign.neurons.functions.LogisticFunction;
+import ru.mipt.sign.neurons.functions.Sigmoid;
 import ru.mipt.sign.neurons.inner.Weights;
 
 public class Neuron implements Comparable<Neuron>
@@ -60,7 +60,7 @@ public class Neuron implements Comparable<Neuron>
     {
         return delta.get(index);
     }
-
+    
     public void setDelta(int index, double delta)
     {
         this.delta.put(index, delta);
@@ -154,9 +154,16 @@ public class Neuron implements Comparable<Neuron>
         input = new HashMap<Integer, Double>();
         output = new HashMap<Integer, Double>();
         weights = new Weights(0, 0);
+        weights.setParent(this);
         connections = new HashSet<Connection>();
         delta = new HashMap<Integer, Double>();
         state = NeuronConst.STATE_INIT;
+    }
+
+    public void setWeights(Weights weights)
+    {
+        this.weights = weights;
+        this.weights.setParent(this);
     }
 
     public Weights getWeights()
@@ -192,7 +199,7 @@ public class Neuron implements Comparable<Neuron>
         double[][] matrix = weights.getWeightsForCalc();
         if (function == null)
         {
-            function = new LogisticFunction();
+            function = new Sigmoid();
         }
         int outNumber = weights.getOutNumber();
         int inNumber = weights.getInNumber();
@@ -204,6 +211,7 @@ public class Neuron implements Comparable<Neuron>
                 sum += matrix[j][i] * input.get(j);
             }
             this.sum = sum;
+//            Log.debug("Neuron " + id + " calc sum: " + sum);
             sum = function.getValue(sum);
             output.put(i, sum);
         }
@@ -217,14 +225,12 @@ public class Neuron implements Comparable<Neuron>
 
     public void removeInputs(List<Integer> inputs)
     {
-        int delta = inputs.size();
         weights.removeInputs(inputs);
         input = new HashMap<Integer, Double>();
     }
 
     public void removeOutputs(List<Integer> outputs)
     {
-        int delta = outputs.size();
         weights.removeOutputs(outputs);
         output = new HashMap<Integer, Double>();
     }
@@ -285,7 +291,8 @@ public class Neuron implements Comparable<Neuron>
 
     public double getDerivative()
     {
-        return function.getDerivative(sum);
+//        Log.debug("Sum: " + sum + " Derivative: " + function.getDerivative(sum));
+        return function.getDerivative(function.getValue(sum));
     }
 
     public boolean connectedTo(BigInteger id)

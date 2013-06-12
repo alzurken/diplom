@@ -2,22 +2,35 @@ package ru.mipt.sign.neurons.inner;
 
 import java.util.*;
 
+import ru.mipt.sign.neurons.Neuron;
+import ru.mipt.sign.neurons.NeuronConst;
+
 public class Weights
 {
     private Map<Integer, Map<Integer, Double>> weights;
+    private Map<Integer, Map<Integer, Double>> dweights;
     private int inNumber;
     private int outNumber;
-    private Random random;
+    private Neuron parent;
+    private Random random = new Random(System.currentTimeMillis());
+    private double alpha = 0.001;
+
+    public void setParent(Neuron neuron)
+    {
+        this.parent = neuron;
+    }
 
     public Weights(Integer inNumber, Integer outNumber)
     {
         this.inNumber = inNumber;
         this.outNumber = outNumber;
         weights = new HashMap<Integer, Map<Integer, Double>>();
-        random = new Random(System.currentTimeMillis());
+        dweights = new HashMap<Integer, Map<Integer, Double>>();
+
         for (int i = 0; i < inNumber; i++)
         {
             weights.put(i, new HashMap<Integer, Double>());
+            dweights.put(i, new HashMap<Integer, Double>());
             for (int j = 0; j < outNumber; j++)
             {
                 weights.get(i).put(j, initValue());
@@ -37,16 +50,16 @@ public class Weights
         }
         return result;
     }
-    
+
     public Double[][] getWeightsForShow()
     {
         Double[][] result = new Double[inNumber][outNumber + 1];
         for (int i = 0; i < inNumber; i++)
         {
-            result[i][0] = Double.valueOf(i);
+            result[i][0] = Double.valueOf(i + 1);
             for (int j = 0; j < outNumber; j++)
             {
-                result[i][j+1] = weights.get(i).get(j);
+                result[i][j + 1] = weights.get(i).get(j);
             }
         }
         return result;
@@ -57,6 +70,7 @@ public class Weights
         for (int i = inNumber; i < inNumber + extraNumber; i++)
         {
             weights.put(i, new HashMap<Integer, Double>());
+            dweights.put(i, new HashMap<Integer, Double>());
             for (int j = 0; j < outNumber; j++)
             {
                 weights.get(i).put(j, initValue());
@@ -79,7 +93,15 @@ public class Weights
 
     public void changeWeight(int input, int output, double value)
     {
-        weights.get(input).put(output, weights.get(input).get(output) + value);
+        if (parent.getRole() != NeuronConst.INPUT_ROLE)
+        {
+            Double previousW = dweights.get(input).get(output);
+            if (previousW == null)
+                previousW = 0d;
+            double deltaW = value + previousW * alpha;
+            weights.get(input).put(output, weights.get(input).get(output) + deltaW);
+            dweights.get(input).put(output, deltaW);
+        }
     }
 
     public Double getWeight(int input, int output)
@@ -110,11 +132,14 @@ public class Weights
         for (int i = min; i < min + delta; i++)
         {
             weights.remove(i);
+            dweights.remove(i);
         }
         for (int i = min + delta; i < inNumber; i++)
         {
             weights.put(i - delta, weights.get(i));
             weights.remove(i);
+            dweights.put(i - delta, weights.get(i));
+            dweights.remove(i);
         }
         inNumber -= delta;
     }
@@ -129,11 +154,14 @@ public class Weights
             for (int j = min; j < min + delta; j++)
             {
                 weights.get(i).remove(j);
+                dweights.get(i).remove(j);
             }
             for (int j = min + delta; j < outNumber; j++)
             {
                 weights.get(i).put(j - delta, weights.get(i).get(j));
                 weights.get(i).remove(j);
+                dweights.get(i).put(j - delta, weights.get(i).get(j));
+                dweights.get(i).remove(j);
             }
         }
         outNumber -= delta;
@@ -143,23 +171,27 @@ public class Weights
     {
         this.inNumber = inNumber;
         weights = new HashMap<Integer, Map<Integer, Double>>();
+        dweights = new HashMap<Integer, Map<Integer, Double>>();
         for (int i = 0; i < this.inNumber; i++)
         {
             weights.put(i, new HashMap<Integer, Double>());
+            dweights.put(i, new HashMap<Integer, Double>());
             for (int j = 0; j < outNumber; j++)
             {
                 weights.get(i).put(j, initValue());
             }
         }
     }
-    
+
     public void setOutNumber(int outNumber)
     {
         this.outNumber = outNumber;
         weights = new HashMap<Integer, Map<Integer, Double>>();
+        dweights = new HashMap<Integer, Map<Integer, Double>>();
         for (int i = 0; i < this.inNumber; i++)
         {
             weights.put(i, new HashMap<Integer, Double>());
+            dweights.put(i, new HashMap<Integer, Double>());
             for (int j = 0; j < this.outNumber; j++)
             {
                 weights.get(i).put(j, initValue());
@@ -169,7 +201,7 @@ public class Weights
 
     public Double initValue()
     {
-        return random.nextDouble()*0.1;
+        return 2 * random.nextDouble() - 1;
     }
 
     public int getInNumber()

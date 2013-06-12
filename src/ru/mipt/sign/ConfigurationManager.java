@@ -12,6 +12,7 @@ import org.jdom.output.XMLOutputter;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.core.exceptions.NextCommandException;
 import ru.mipt.sign.facade.NeuroManager;
+import ru.mipt.sign.neurons.HopfieldNeuroNet;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.neurons.NeuronConst;
 import ru.mipt.sign.util.ParserXml;
@@ -72,7 +73,7 @@ public class ConfigurationManager
 
     public static void init()
     {
-        init(1, 1);
+        init(3, 1);
     }
 
     public static void init(Integer inNumber, Integer outNumber)
@@ -80,14 +81,8 @@ public class ConfigurationManager
         ApplicationContext appCtx = ApplicationContext.getInstance();
         appCtx.setCurrentID(BigInteger.ZERO);
         appCtx.setOut(System.out);
-        NeuroNet nn = new NeuroNet(inNumber, outNumber);
-        try
-        {
-            nn.setInputNeuron(BigInteger.ONE);
-        } catch (NeuronNotFound e)
-        {
-            System.out.println("There is no neuron with id = " + e.getId());
-        }
+        NeuroNet nn = new HopfieldNeuroNet(inNumber);
+        
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
     }

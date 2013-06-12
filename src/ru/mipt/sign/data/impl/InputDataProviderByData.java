@@ -30,10 +30,4 @@ public class InputDataProviderByData implements InputDataProvider
         return result;
     }
 
-    @Override
-    public List<Double> getCurrentInput()
-    {
-        return input;
-    }
-
 }

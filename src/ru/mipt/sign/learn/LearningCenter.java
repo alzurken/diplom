@@ -26,7 +26,7 @@ public class LearningCenter
         this.learnType = type;
     }
 
-    public void learn(NeuroNet nn, List result, List rightValue) throws NeuronNotFound
+    public void learn(NeuroNet nn, List result, List rightValue, Double eta) throws NeuronNotFound
     {
         LearningAction action = null;
         Integer type;
@@ -61,6 +61,7 @@ public class LearningCenter
             break;
         case TYPE_WEIGHT:
             action = new WeightAction(nn, result, rightValue);
+            ((WeightAction) action).setEta(eta);
             break;
         case TYPE_CONNECT:
             action = new ConnectAction(nn, result, rightValue);
