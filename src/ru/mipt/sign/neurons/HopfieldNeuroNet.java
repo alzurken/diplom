@@ -17,7 +17,7 @@ public class HopfieldNeuroNet extends NeuroNet
     
     public HopfieldNeuroNet(Integer inNumber)
     {
-        outputID = NeuronConst.LAST_NEURON_ID;
+        outputID = LAST_NEURON_ID;
         this.inputNumber = inNumber;
         for (int i = 0; i < inputNumber; i++)
         {
@@ -28,14 +28,14 @@ public class HopfieldNeuroNet extends NeuroNet
             neuroPool.put(id, new Neuron(id));
             BigInteger outID = getNextOutID();
             neuron2out.put(id, outID);
-            Neuron out = new Neuron(outID);
-            out.setWeights(new UnitWeights(0, 1));
-            out.setFunction(new UnitFunction());
-            neuroPool.put(outID, out);
+            Neuron outputNeuron = new Neuron(outID);
+            outputNeuron.setWeights(new UnitWeights(0, 1));
+            outputNeuron.setFunction(new UnitFunction());
+            neuroPool.put(outID, outputNeuron);
             try
             {
                 setInputNeuron(inputNeuron);
-                setOutputNeuron(out, false);
+                setOutputNeuron(outputNeuron, false);
                 connectNeuron(inID, id, 1);
             } catch (NeuronNotFound e)
             {
@@ -50,7 +50,7 @@ public class HopfieldNeuroNet extends NeuroNet
     {
         Neuron first = getNeuron(id1);
         Neuron second = getNeuron(id2);
-        if ((first.getRole() == NeuronConst.INPUT_ROLE) || (second.getRole() == NeuronConst.OUTPUT_ROLE))
+        if ((first.getRole() == INPUT_ROLE) || (second.getRole() == OUTPUT_ROLE))
         {
             super.connectNeuron(id1, id2, fiber);
             return;
@@ -78,12 +78,12 @@ public class HopfieldNeuroNet extends NeuroNet
         {
             Neuron so = neuroPool.get(k);
             Neuron n = (Neuron) so;
-            if (n.getState() == NeuronConst.STATE_READY)
+            if (n.getState() == STATE_READY)
             {
                 n.calc();
                 n.emit();
             }
-            if (n.getState() == NeuronConst.STATE_INIT)
+            if (n.getState() == STATE_INIT)
             {
                 cache.put(n.getID(), n);
             }
@@ -97,11 +97,11 @@ public class HopfieldNeuroNet extends NeuroNet
             while (it.hasNext())
             {
                 Neuron n = it.next();
-                if (n.getRole() != NeuronConst.OUTPUT_ROLE)
+                if (n.getRole() != OUTPUT_ROLE)
                 {
                     onlyOutNeurons = false;
                 }
-                if (n.getState() == NeuronConst.STATE_READY)
+                if (n.getState() == STATE_READY)
                 {
                     n.calc();
                     n.emit();

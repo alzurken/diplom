@@ -27,7 +27,7 @@ public class LoadCommand extends Command
                 if ((name != null) && (!name.isEmpty()))
                 {
                     ConfigurationManager.init(name);
-                    out.println("Configuration loaded from " + param[1] + ".xml file");
+                    out.println("Configuration loaded from " + param[1] + ".jsn file");
                 } else
                 {
                     name = "configuration";
@@ -37,7 +37,7 @@ public class LoadCommand extends Command
             }
         } catch (NextCommandException e)
         {
-            out.println("It's impossible to load file " + name + ".xml");
+            out.println("It's impossible to load file " + name + ".jsn");
         }
     }
 

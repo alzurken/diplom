@@ -6,14 +6,23 @@ import java.util.*;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import ru.mipt.sign.core.JSONable;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 
-public class Connection
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+public class Connection implements JSONable
 {
     private Neuron aNeuron;
     private Neuron zNeuron;
     private Map<Integer, Integer> a2zMapping;
     private NeuroNet parent;
+    
+    {
+        a2zMapping = new HashMap<Integer, Integer>();
+    }
     
     public Map<Integer, Integer> getA2zMapping()
     {
@@ -99,10 +108,10 @@ public class Connection
         System.out.println("Disconnected neurons " + aNeuron.getID() + " and " + zNeuron.getID());
     }
 
+    @Deprecated
     public Connection(Element el, NeuroNet nn) throws NeuronNotFound {
         parent = nn;
         Element connection = el;
-        init();
         try
         {
             this.aNeuron = parent.getNeuron(new BigInteger(connection.getAttribute("aNeuron").getValue()));
@@ -126,15 +135,26 @@ public class Connection
     }
 
     public Connection(NeuroNet nn) {
-        init();
         parent = nn;
     }
 
-    private void init()
+    public Connection(JsonObject json, NeuroNet nn)
     {
-        a2zMapping = new HashMap<Integer, Integer>();
+        parent = nn;
+        try
+        {
+            aNeuron = nn.getNeuron(json.get("aNeuron").getAsBigInteger());
+            aNeuron.addConnection(this);
+            zNeuron = nn.getNeuron(json.get("zNeuron").getAsBigInteger());
+        } catch (NeuronNotFound e)
+        {
+            e.printStackTrace();
+        }
+        String mapping = json.get("mapping").getAsString();
+        Gson gson = new Gson();
+        a2zMapping = gson.fromJson(mapping, new TypeToken<Map<Integer, Integer>>() {}.getType());
     }
-
+    
     public Element getXML()
     {
         Element connection = new Element("connection");
@@ -235,5 +255,18 @@ public class Connection
         else if (!zNeuron.equals(other.zNeuron))
             return false;
         return true;
+    }
+
+
+    @Override
+    public JsonObject getJSON()
+    {
+        JsonObject result = new JsonObject();
+        result.addProperty("aNeuron", aNeuron.getID());
+        result.addProperty("zNeuron", zNeuron.getID());
+        Gson gson = new Gson();
+        String s = gson.toJson(a2zMapping);
+        result.addProperty("mapping", s);
+        return result;
     }
 }

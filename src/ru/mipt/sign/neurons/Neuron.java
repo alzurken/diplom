@@ -5,11 +5,14 @@ import java.util.*;
 
 import org.jdom.Element;
 
+import ru.mipt.sign.core.JSONable;
 import ru.mipt.sign.neurons.functions.ActivationFunction;
 import ru.mipt.sign.neurons.functions.Sigmoid;
 import ru.mipt.sign.neurons.inner.Weights;
 
-public class Neuron implements Comparable<Neuron>
+import com.google.gson.JsonObject;
+
+public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
 {
     private BigInteger id;
     private Element image;
@@ -19,10 +22,10 @@ public class Neuron implements Comparable<Neuron>
     private HashMap<Integer, Double> input;
     private HashMap<Integer, Double> output;
     private int currentIn = 0;
-    private int state = NeuronConst.STATE_INIT;
-    private int role = NeuronConst.NORMAL_ROLE;
+    private int state = STATE_INIT;
+    private int role = NORMAL_ROLE;
     private int order;
-    private ActivationFunction function;
+    private ActivationFunction function = new Sigmoid();
     private double sum = 0d;
     private HashMap<Integer, Double> delta;
 
@@ -133,6 +136,7 @@ public class Neuron implements Comparable<Neuron>
         weights.randomize();
     }
 
+    @Deprecated
     public Neuron(BigInteger id, Element elem, Weights weights)
     {
         this.id = id;
@@ -145,6 +149,28 @@ public class Neuron implements Comparable<Neuron>
         this.state = state;
     }
 
+    public Neuron(JsonObject json)
+    {
+        id = json.get("id").getAsBigInteger();
+        weights = new Weights(json.get("weights").getAsJsonObject());
+        role = json.get("role").getAsInt();
+        order = json.get("order").getAsInt();
+        String functionName = json.get("function").getAsString();
+        try
+        {
+            function = (ActivationFunction) Class.forName(functionName).newInstance();
+        } catch (InstantiationException e)
+        {
+            e.printStackTrace();
+        } catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
     public Neuron(BigInteger id)
     {
         this.id = id;
@@ -157,7 +183,7 @@ public class Neuron implements Comparable<Neuron>
         weights.setParent(this);
         connections = new HashSet<Connection>();
         delta = new HashMap<Integer, Double>();
-        state = NeuronConst.STATE_INIT;
+        state = STATE_INIT;
     }
 
     public void setWeights(Weights weights)
@@ -197,10 +223,6 @@ public class Neuron implements Comparable<Neuron>
     {
         double sum = 0.0;
         double[][] matrix = weights.getWeightsForCalc();
-        if (function == null)
-        {
-            function = new Sigmoid();
-        }
         int outNumber = weights.getOutNumber();
         int inNumber = weights.getInNumber();
         for (int i = 0; i < outNumber; i++)
@@ -215,7 +237,7 @@ public class Neuron implements Comparable<Neuron>
             sum = function.getValue(sum);
             output.put(i, sum);
         }
-        state = NeuronConst.STATE_CALCULATED;
+        state = STATE_CALCULATED;
     }
 
     public void changeWeight(int i, int j, double changeValue)
@@ -247,7 +269,7 @@ public class Neuron implements Comparable<Neuron>
         currentIn++;
         if ((currentIn == weights.getInNumber()))
         {
-            state = NeuronConst.STATE_READY;
+            state = STATE_READY;
             currentIn = 0;
         }
     }
@@ -345,5 +367,17 @@ public class Neuron implements Comparable<Neuron>
     public int compareTo(Neuron neuron)
     {
         return -id.compareTo(neuron.getID());
+    }
+    
+    public JsonObject getJSON()
+    {
+        JsonObject result = new JsonObject();
+        
+        result.addProperty("id", id);
+        result.add("weights", weights.getJSON());
+        result.addProperty("role", role);
+        result.addProperty("order", order);
+        result.addProperty("function", function.getClass().getCanonicalName());
+        return result;
     }
 }

@@ -1,10 +1,10 @@
 package ru.mipt.sign.ui.tui.command;
 
 import java.io.PrintStream;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimerTask;
 
 import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronException;
@@ -25,8 +25,15 @@ public class StartCommand extends Command
         {
             numberOfSteps = Long.valueOf(temp[1]);
         }
-        ApplicationContext.getInstance().getManager().start(numberOfSteps);
-
+        ApplicationContext.getInstance().getTimer().schedule(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                ApplicationContext.getInstance().getManager().start();
+            }
+        }, 0, DELAY);
+        System.out.println("Processing started");
     }
 
     @Override

@@ -7,21 +7,22 @@ import javax.swing.SwingUtilities;
 import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronException;
 import ru.mipt.sign.neurons.NeuronConst;
-import ru.mipt.sign.ui.gui.MainWindow;
 import ru.mipt.sign.ui.tui.command.Command;
 import ru.mipt.sign.ui.tui.command.CommandFactory;
 import ru.mipt.sign.ui.tui.command.Result;
 
-public class Console
+public class Console implements NeuronConst
 {
-    
+
     public static void start()
     {
         byte[] input = new byte[255];
-        System.out.println("Sign v" + NeuronConst.VERSION + " started");
-        
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+        System.out.println("Sign v" + VERSION + " started");
+
+        SwingUtilities.invokeLater(new Runnable()
+        {
+            public void run()
+            {
                 ApplicationContext.getInstance().getMainWindow().display();
                 System.out.println("GUI started");
             }
@@ -55,14 +56,13 @@ public class Console
             } catch (NeuronException e)
             {
                 System.out.println(e.toString());
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 e.printStackTrace();
             }
 
         }
-        System.out.println("Sign v" + NeuronConst.VERSION + " stopped");
+        System.out.println("Sign v" + VERSION + " stopped");
     }
 
 }

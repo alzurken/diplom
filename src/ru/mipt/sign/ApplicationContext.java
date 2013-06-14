@@ -2,6 +2,7 @@ package ru.mipt.sign;
 
 import java.io.PrintStream;
 import java.math.BigInteger;
+import java.util.Timer;
 
 import ru.mipt.sign.facade.NeuroManager;
 import ru.mipt.sign.neurons.NeuroNet;
@@ -9,7 +10,6 @@ import ru.mipt.sign.ui.gui.MainWindow;
 
 public class ApplicationContext
 {
-    private BigInteger current_id;
     private BigInteger last_added_id;
     private BigInteger last_removed_id;
     private NeuroNet net;
@@ -17,12 +17,18 @@ public class ApplicationContext
     private PrintStream out;
     private static ApplicationContext instance = new ApplicationContext();
     private final MainWindow mainWindow;
+    private Timer timer = new Timer();
     
     public static ApplicationContext getInstance()
     {
         return instance;
     }
     
+    public Timer getTimer()
+    {
+        return timer;
+    }
+
     private ApplicationContext()
     {
         mainWindow = new MainWindow();
@@ -74,11 +80,6 @@ public class ApplicationContext
         this.manager = manager;
     }
 
-    public void setCurrentID(BigInteger current_id)
-    {
-        this.current_id = current_id;
-    }
-
     public void setNet(NeuroNet net)
     {
         this.net = net;
@@ -87,12 +88,6 @@ public class ApplicationContext
     public NeuroNet getNeuroNet()
     {
         return net;
-    }
-
-    public BigInteger getNextId()
-    {
-        current_id = current_id.add(new BigInteger("1"));
-        return current_id;
     }
 
 }

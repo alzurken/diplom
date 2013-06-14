@@ -8,22 +8,22 @@ import ru.mipt.sign.neurons.NeuronConst;
 import ru.mipt.sign.ui.gui.GNeuron;
 import ru.mipt.sign.ui.gui.GUIConst;
 
-public class NeuronTransformer implements Transformer<GNeuron, Paint>
+public class NeuronTransformer implements Transformer<GNeuron, Paint>, NeuronConst
 {
 
     @Override
     public Paint transform(GNeuron gNeuron)
     {
         Integer role = gNeuron.getRole();
-        if (role == NeuronConst.INPUT_ROLE)
+        if (role == INPUT_ROLE)
         {
             return GUIConst.INPUT_NEURON_COLOR;
         }
-        if (role == NeuronConst.NORMAL_ROLE)
+        if (role == NORMAL_ROLE)
         {
             return GUIConst.NORMAL_NEURON_COLOR;
         }
-        if (role == NeuronConst.OUTPUT_ROLE)
+        if (role == OUTPUT_ROLE)
         {
             return GUIConst.OUTPUT_NEURON_COLOR;
         }

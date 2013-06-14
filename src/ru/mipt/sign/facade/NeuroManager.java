@@ -5,18 +5,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
-import ru.mipt.sign.data.InputDataProvider;
-import ru.mipt.sign.data.impl.InputDataProviderByData;
-import ru.mipt.sign.data.impl.InputDataProviderByNeuron;
-import ru.mipt.sign.learn.LearningCenter;
 import ru.mipt.sign.neurons.NeuroNet;
+import ru.mipt.sign.neurons.data.InputDataProvider;
+import ru.mipt.sign.neurons.data.impl.InputDataProviderByData;
+import ru.mipt.sign.neurons.data.impl.InputDataProviderByNeuron;
+import ru.mipt.sign.neurons.learn.LearningCenter;
 
 public class NeuroManager
 {
@@ -26,6 +23,11 @@ public class NeuroManager
     private static double c = 1;
     private static double prevAccuracy = 0;
 
+    public void start()
+    {
+        System.out.println(new Date(System.currentTimeMillis()));
+    }
+    
     public void start(Long numberOfSteps) throws NeuronNotFound
     {
         ApplicationContext appCtx = ApplicationContext.getInstance();

@@ -5,23 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
-
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.core.exceptions.NextCommandException;
 import ru.mipt.sign.facade.NeuroManager;
-import ru.mipt.sign.neurons.HopfieldNeuroNet;
 import ru.mipt.sign.neurons.NeuroNet;
 import ru.mipt.sign.neurons.NeuronConst;
-import ru.mipt.sign.util.ParserXml;
-import ru.mipt.sign.util.XmlFormatter;
+import ru.mipt.sign.util.ParserJSON;
 
-public class ConfigurationManager
+import com.google.gson.JsonObject;
+
+public class ConfigurationManager implements NeuronConst
 {
-    private static String DATA_PATH = "data/input.dat";
-
     public static void connect(BigInteger id1, BigInteger id2, Integer fiber) throws NeuronNotFound
     {
         NeuroNet nn = ApplicationContext.getInstance().getNeuroNet();
@@ -53,12 +47,11 @@ public class ConfigurationManager
         {
             key = "configuration";
         }
-        ParserXml parser = new ParserXml(NeuronConst.DEFAULT_CONF_PATH + key + ".xml");
+        JsonObject neuroNet = ParserJSON.getJsonObject(DEFAULT_CONF_PATH + key + ".jsn");
 
         ApplicationContext appCtx = ApplicationContext.getInstance();
-        appCtx.setCurrentID(parser.getCurrentID());
         appCtx.setOut(System.out);
-        NeuroNet nn = new NeuroNet(parser);
+        NeuroNet nn = new NeuroNet(neuroNet);
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
 
@@ -73,15 +66,14 @@ public class ConfigurationManager
 
     public static void init()
     {
-        init(3, 1);
+        init(1, 1);
     }
 
     public static void init(Integer inNumber, Integer outNumber)
     {// TODO megre init method
         ApplicationContext appCtx = ApplicationContext.getInstance();
-        appCtx.setCurrentID(BigInteger.ZERO);
         appCtx.setOut(System.out);
-        NeuroNet nn = new HopfieldNeuroNet(inNumber);
+        NeuroNet nn = new NeuroNet(inNumber, outNumber);
         
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
@@ -94,32 +86,20 @@ public class ConfigurationManager
 
     public static void saveConfiguration(String name)
     {
-        Element root = new Element("configuration");
-        Document doc = new Document(root);
-        root.addContent(ApplicationContext.getInstance().getNeuroNet().getXml());
-        saveParams(root);
+        JsonObject neuroNet = ApplicationContext.getInstance().getNeuroNet().getJSON();
 
-        String out = "";
-        XMLOutputter outputter = new XMLOutputter();
-        out = outputter.outputString(doc);
-        File f = new File(NeuronConst.DEFAULT_CONF_PATH + name + ".xml");
+        String out = neuroNet.toString();
+        File f = new File(DEFAULT_CONF_PATH + name + ".jsn");
         f.setWritable(true);
         try
         {
             FileWriter fw = new FileWriter(f);
-            fw.write(XmlFormatter.format(out));
+            fw.write(out);
             fw.close();
         } catch (IOException e)
         {
             e.printStackTrace();
         }
-    }
-
-    private static void saveParams(Element conf)
-    {
-        Element id = new Element("current_id");
-        id.setAttribute("value", ApplicationContext.getInstance().getNextId().toString());
-        conf.addContent(id);
     }
 
 }

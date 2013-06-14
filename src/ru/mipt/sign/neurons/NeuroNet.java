@@ -5,18 +5,23 @@ import java.util.*;
 
 import org.jdom.Element;
 
-import ru.mipt.sign.ApplicationContext;
+import ru.mipt.sign.core.JSONable;
 import ru.mipt.sign.core.exceptions.CalculationException;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
-import ru.mipt.sign.data.InputDataProvider;
+import ru.mipt.sign.neurons.data.InputDataProvider;
 import ru.mipt.sign.neurons.factory.NeuronFactory;
 import ru.mipt.sign.neurons.functions.UnitFunction;
 import ru.mipt.sign.neurons.inner.UnitWeights;
+import ru.mipt.sign.util.JSONHelper;
 import ru.mipt.sign.util.Log;
 import ru.mipt.sign.util.ParserXml;
 import ru.mipt.sign.util.comparator.OrderComparator;
 
-public class NeuroNet
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+public class NeuroNet implements JSONable, NeuronConst
 {
     private BigInteger currentID;
     protected HashMap<BigInteger, Neuron> neuroPool;
@@ -79,6 +84,7 @@ public class NeuroNet
         return result;
     }
 
+    @Deprecated
     public Element getXml()
     {
         Element neuronet = new Element("neuronet");
@@ -128,7 +134,7 @@ public class NeuroNet
         List<Neuron> result = new ArrayList<Neuron>();
         for (int i = 0; i < outputNumber; i++)
         {
-            result.add(neuroPool.get(NeuronConst.LAST_NEURON_ID.add(BigInteger.valueOf(i))));
+            result.add(neuroPool.get(LAST_NEURON_ID.add(BigInteger.valueOf(i))));
         }
         return result;
     }
@@ -199,7 +205,7 @@ public class NeuroNet
     public void setInputNeuron(Neuron n) throws NeuronNotFound
     {
         inputNeurons.add(n);
-        n.setRole(NeuronConst.INPUT_ROLE);
+        n.setRole(INPUT_ROLE);
         n.setFunction(new UnitFunction());
         n.setInNumber(1);
         n.setWeights(new UnitWeights(1, n.getOutNumber()));
@@ -230,9 +236,34 @@ public class NeuroNet
             conn.connect(id1, id2, fiber);
     }
 
-    public NeuroNet()
+    protected NeuroNet()
     {
         
+    }
+    
+    public NeuroNet(JsonObject json)
+    {
+        inputNumber = json.get("inputNumber").getAsInt();
+        outputNumber = json.get("outputNumber").getAsInt();
+        currentID = json.get("currentID").getAsBigInteger();
+        JsonArray neurons = json.get("neuroPool").getAsJsonArray();
+        for (JsonElement elem : neurons)
+        {
+            JsonObject obj = (JsonObject) elem;
+            Neuron n = new Neuron(obj);
+            neuroPool.put(n.getID(), n);
+            if (n.getRole() == INPUT_ROLE)
+                inputNeurons.add(n);
+            if (n.getRole() == OUTPUT_ROLE)
+                outputNeurons.add(n);
+        }
+        JsonArray connections = json.get("connPool").getAsJsonArray();
+        for (JsonElement elem : connections)
+        {
+            JsonObject obj = (JsonObject) elem;
+            Connection c = new Connection(obj, this);
+            connPool.add(c);
+        }
     }
     
     public NeuroNet(Integer inNumber, Integer outNumber)
@@ -241,7 +272,7 @@ public class NeuroNet
         this.outputNumber = outNumber;
         for (int i = 0; i < inputNumber; i++)
         {
-            BigInteger id = ApplicationContext.getInstance().getNextId();
+            BigInteger id = getNextId();
             Neuron inputNeuron = new Neuron(id);
             neuroPool.put(id, inputNeuron);
             try
@@ -254,7 +285,7 @@ public class NeuroNet
         }
         for (int i = 0; i < outputNumber; i++)
         {
-            Neuron out = new Neuron(NeuronConst.LAST_NEURON_ID.add(BigInteger.valueOf(i)));
+            Neuron out = new Neuron(LAST_NEURON_ID.add(BigInteger.valueOf(i)));
             neuroPool.put(out.getID(), out);
             try
             {
@@ -291,7 +322,7 @@ public class NeuroNet
 
     public void setOutputNeuron(Neuron n, boolean addOutput) throws NeuronNotFound
     {
-        n.setRole(NeuronConst.OUTPUT_ROLE);
+        n.setRole(OUTPUT_ROLE);
         if (addOutput)
         {
             List<Integer> outputs = new ArrayList<Integer>();
@@ -303,6 +334,7 @@ public class NeuroNet
         outputNumber = outputNeurons.size();
     }
 
+    @Deprecated
     public NeuroNet(ParserXml parser) throws NeuronNotFound
     {
         List<Neuron> neurons = parser.getNeurons();
@@ -364,7 +396,7 @@ public class NeuroNet
         for (Iterator<Neuron> it = this.neuroPool.values().iterator(); it.hasNext();)
         {
             Neuron n = it.next();
-            n.setState(NeuronConst.STATE_INIT);
+            n.setState(STATE_INIT);
         }
         currentInput = new ArrayList<Double>();
         for (Iterator<Neuron> it = this.inputNeurons.iterator(); it.hasNext();)
@@ -381,12 +413,12 @@ public class NeuroNet
         {
             Neuron so = neuroPool.get(k);
             Neuron n = (Neuron) so;
-            if (n.getState() == NeuronConst.STATE_READY)
+            if (n.getState() == STATE_READY)
             {
                 n.calc();
                 n.emit();
             }
-            if (n.getState() == NeuronConst.STATE_INIT)
+            if (n.getState() == STATE_INIT)
             {
                 cache.put(n.getID(), n);
             }
@@ -398,7 +430,7 @@ public class NeuroNet
             while (it.hasNext())
             {
                 Neuron n = it.next();
-                if (n.getState() == NeuronConst.STATE_READY)
+                if (n.getState() == STATE_READY)
                 {
                     n.calc();
                     n.emit();
@@ -442,6 +474,19 @@ public class NeuroNet
             out.append(net.getChildren());
         }
         return out.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public JsonObject getJSON()
+    {
+        JsonObject result = new JsonObject();
+        result.addProperty("inputNumber", inputNumber);
+        result.addProperty("outputNumber", outputNumber);
+        result.addProperty("currentID", currentID);
+        result.add("neuroPool", JSONHelper.getJSONList(neuroPool));
+        result.add("connPool", JSONHelper.getJSONList(connPool));
+        return result;
     }
 
 }

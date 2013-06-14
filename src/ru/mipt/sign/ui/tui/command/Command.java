@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.mipt.sign.core.exceptions.NeuronException;
+import ru.mipt.sign.neurons.NeuronConst;
 
-public abstract class Command
+public abstract class Command implements NeuronConst
 {
     private List<String> commandList = new ArrayList<String>();
     protected Result result = Result.SUCCESSFUL;

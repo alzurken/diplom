@@ -24,7 +24,7 @@ public class SaveCommand extends Command
             if ((param[1] != null) && (!param[1].isEmpty()))
             {
                 ConfigurationManager.saveConfiguration(param[1]);
-                out.println("Configuration saved to /config/" + param[1] + ".xml");
+                out.println("Configuration saved to /config/" + param[1] + ".jsn");
             } else
             {
                 out.println("Bad name for configuration");
@@ -35,7 +35,7 @@ public class SaveCommand extends Command
             Calendar cal = Calendar.getInstance();
             String name = "Net - " + dateFormat.format(cal.getTime());
             ConfigurationManager.saveConfiguration(name);
-            out.println("Configuration saved to /config/" + name + ".xml");
+            out.println("Configuration saved to /config/" + name + ".jsn");
         }
     }
 

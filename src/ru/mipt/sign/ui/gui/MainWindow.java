@@ -13,7 +13,7 @@ import ru.mipt.sign.ui.gui.plugins.MousePlugin;
 import ru.mipt.sign.ui.gui.plugins.VertexMenu;
 import ru.mipt.sign.ui.gui.transformers.LabelTransformer;
 import ru.mipt.sign.ui.gui.transformers.NeuronTransformer;
-import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
+import edu.uci.ics.jung.algorithms.layout.FRLayout2;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
@@ -72,7 +72,7 @@ public class MainWindow
     {
         GNeuronNet graph = new GNeuronNet();
 
-        Layout<GNeuron, GConnection> layout = new ISOMLayout<GNeuron, GConnection>(graph.getGraph());
+        Layout<GNeuron, GConnection> layout = new FRLayout2<GNeuron, GConnection>(graph.getGraph());
         vv = new VisualizationViewer<GNeuron, GConnection>(layout);
 
         Dimension size = new Dimension(graphPanel.getWidth(), graphPanel.getHeight());

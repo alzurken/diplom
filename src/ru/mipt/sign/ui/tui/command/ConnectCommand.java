@@ -39,7 +39,7 @@ public class ConnectCommand extends Command
         {
             for (int i = 0; i < appCtx.getNeuroNet().getOutputNumber(); i++)
             {
-                id2 = NeuronConst.LAST_NEURON_ID.add(BigInteger.valueOf(i));
+                id2 = LAST_NEURON_ID.add(BigInteger.valueOf(i));
                 ConfigurationManager.connect(id1, id2, fiber);
                 out.println("Connected successfully: " + id1 + " -> " + id2 + " : " + fiber);
             }

@@ -21,7 +21,7 @@ public class ReadCommand extends Command
         {
             if ((param[1] != null) && (!param[1].isEmpty()))
             {
-                String path = NeuronConst.DEFAULT_CONF_PATH + param[1] + ".cl";
+                String path = DEFAULT_CONF_PATH + param[1] + ".cl";
                 File file = new File(path);
                 try
                 {
