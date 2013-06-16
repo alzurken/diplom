@@ -60,10 +60,10 @@ public class NewsVector {
 	 */
 	    
 	   
-	    public  Map<String,Integer> GetTermsBasisForAllNews() throws NextCommandException, IOException, ParseException
+	    public  Map<String,Double> GetTermsBasisForAllNews() throws NextCommandException, IOException, ParseException
 	    {
 	    	 Directory index = new RAMDirectory();
-	    	 Map <String,Integer> termsAndFreqs = new HashMap<String, Integer>();
+	    	 Map <String,Double> termsAndFreqs = new HashMap<String, Double>();
 	    	
 	    	 RSSParser rsspars = new RSSParser();
 	    	 List<News> newsList = rsspars.LoadText();
@@ -96,8 +96,8 @@ public class NewsVector {
 		    	 BytesRef text = null;
 		    	 while ((text = termsEnum.next()) != null) {
 		    		 String term = text.utf8ToString();
-		    		 int freq = (int) termsEnum.totalTermFreq();
-		    		 int oldfreq = termsAndFreqs.get(term) == null? 0 : termsAndFreqs.get(term);
+		    		 double freq = (double) termsEnum.totalTermFreq();
+		    		 double oldfreq = termsAndFreqs.get(term) == null? 0 : termsAndFreqs.get(term);
 		    	     termsAndFreqs.put(term, freq+oldfreq);		    	     
 		    	 }
 		     }
@@ -105,21 +105,19 @@ public class NewsVector {
 		     reader.close();
 		     
 		     ValueComparator bvc =  new ValueComparator(termsAndFreqs);
-		     TreeMap<String,Integer> sorted_map = new TreeMap<String,Integer>(bvc);
+		     TreeMap<String,Double> sorted_map = new TreeMap<String,Double>(bvc);
 		     sorted_map.putAll(termsAndFreqs);
 		     return sorted_map;
 	    }
 	    
 	  
 	    
-	    public  List<Double> BuildFinalVectorForOneNew(News thisNew) throws IOException, ParseException, NextCommandException, org.apache.lucene.queryparser.classic.ParseException, NeuronNotFound
+	    
+	    
+	    
+	    public  Map<String,Double> BuildFinalVectorForOneNew(News thisNew) throws IOException, ParseException, NextCommandException, org.apache.lucene.queryparser.classic.ParseException, NeuronNotFound
 	    {
-		
-	    	
-	    	
-		   //build frequencies of terms in this docId
-		    
-		    	 
+	    	//build frequencies of terms in this new
 	    	//build the matrix of correlation for terms 
 		    	
 		    	 		    	 
@@ -192,7 +190,7 @@ public class NewsVector {
 	     w.addDocument(doc);
 	   }
 	
-	public  List<Double> BuildHopsfieldByVector( Map<String, Double> frequencies,  Map<String, Integer> termsInDoc, double[][] corMatrix ) throws IOException, ParseException, NextCommandException, org.apache.lucene.queryparser.classic.ParseException, NeuronNotFound
+	public  Map<String,Double> BuildHopsfieldByVector( Map<String, Double> frequencies,  Map<String, Integer> termsInDoc, double[][] corMatrix ) throws IOException, ParseException, NextCommandException, org.apache.lucene.queryparser.classic.ParseException, NeuronNotFound
 	{
 		HopfieldNeuroNet net = new HopfieldNeuroNet(frequencies.size());
 		List<BigInteger> neurons = net.getRealNeurons();
@@ -242,7 +240,14 @@ public class NewsVector {
 		 }
 		// System.out.println("output2:"+net.getResult());
 		//System.out.println(termsToNeurons);
-		  return net.getResult();
+		 Map<String,Double> outputMap = new HashMap<String, Double>();
+		 it = terms.iterator();
+		 Iterator<Double> it3 = net.getResult().iterator();
+		 while (it.hasNext()) {
+				outputMap.put(it.next(),it3.next());
+			}
+		 
+		  return outputMap;
 		
 	}
 	
@@ -250,8 +255,8 @@ public class NewsVector {
 
 class ValueComparator implements Comparator<String> {
 
-    Map<String, Integer> base;
-    public ValueComparator(Map<String, Integer> base) {
+    Map<String, Double> base;
+    public ValueComparator(Map<String, Double> base) {
         this.base = base;
     }
 

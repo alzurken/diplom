@@ -2,8 +2,12 @@ package ru.mipt.sign.news;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.core.exceptions.NextCommandException;
 import ru.mipt.sign.newsvector.NewsVector;
@@ -29,10 +33,26 @@ public class New
         return curNew.getDate();
     }
 
-    public List<Double> getVectorOfNew() throws NextCommandException, NeuronNotFound, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException 
+    public Map<String,Double> getVectorOfNewInNewBasis() throws NextCommandException, NeuronNotFound, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException 
     {
     	NewsVector tmp = new NewsVector();
         return tmp.BuildFinalVectorForOneNew(curNew);
+    }
+    
+    public List<Double> getVectorOfNewInFullBasis() throws NextCommandException, NeuronNotFound, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException 
+    {
+    	NewsVector tmp = new NewsVector();
+    	Map<String, Double> mapInNewBasis = tmp.BuildFinalVectorForOneNew(curNew);
+        Map<String,Double> fullBasis = tmp.GetTermsBasisForAllNews();
+        Map<String,Double> mergedMap = new HashMap();
+        mergedMap.putAll(fullBasis);
+        mergedMap.putAll(mapInNewBasis);
+        //System.out.println(mapInNewBasis);
+        //System.out.println(fullBasis.keySet());
+        // System.out.println(mergedMap.keySet());
+        List<Double> thisOutput = new ArrayList(mergedMap.values());
+        
+    	return thisOutput;
     }
     
     public boolean NextNew () {
