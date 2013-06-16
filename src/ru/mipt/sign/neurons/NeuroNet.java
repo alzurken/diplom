@@ -31,7 +31,7 @@ public class NeuroNet implements JSONable, NeuronConst
     protected int outputNumber;
     protected TreeSet<Neuron> outputNeurons;
     protected InputDataProvider inputProvider;
-    private List<Double> currentInput;
+    protected List<Double> currentInput;
     private Map<BigInteger, List<Connection>> cacheConnectionsForANeuron;
     private Map<BigInteger, List<Connection>> cacheConnectionsForZNeuron;
 
@@ -64,6 +64,16 @@ public class NeuroNet implements JSONable, NeuronConst
     public List<Neuron> getNeurons()
     {
         return new ArrayList<Neuron>(neuroPool.values());
+    }
+    
+    public List<Neuron> getNeurons(List<BigInteger> ids) throws NeuronNotFound
+    {
+        List<Neuron> result = new ArrayList<Neuron>();
+        for (BigInteger id : ids)
+        {
+                result.add(getNeuron(id));
+        }
+        return result;
     }
 
     public List<BigInteger> getNeuronIDs()
@@ -234,12 +244,12 @@ public class NeuroNet implements JSONable, NeuronConst
 
     public void setInputNeuron(Neuron n) throws NeuronNotFound
     {
+        n.setOrder(inputNeurons.size());
         inputNeurons.add(n);
         n.setRole(INPUT_ROLE);
         n.setFunction(new UnitFunction());
         n.setInNumber(1);
         n.setWeights(new UnitWeights(1, n.getOutNumber()));
-        n.setOrder(inputNeurons.size() + 1);
     }
 
     public void connectNeuron(BigInteger id1, BigInteger id2, int fiber) throws NeuronNotFound
@@ -359,8 +369,8 @@ public class NeuroNet implements JSONable, NeuronConst
             outputs.add(0);
             n.addOutputs(outputs.size());
         }
+        n.setOrder(outputNeurons.size());
         outputNeurons.add(n);
-        n.setOrder(outputNeurons.size() + 1);
         outputNumber = outputNeurons.size();
     }
 

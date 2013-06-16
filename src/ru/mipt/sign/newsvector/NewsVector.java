@@ -234,10 +234,17 @@ public class NewsVector {
 		 net.calc();
 		 System.out.println("input:"+inputData);
 		 System.out.println("output1:"+net.getResult());
+        double energy = net.getEnergy();
+		 for (int k = 0; k< 10; k++)
+		 {
 		 List<Double> result = net.getResult();
 		 net.setInputProvider(new InputDataProviderByData(result,1));
 		 net.calc();
-		
+
+		 double currentEnergy = net.getEnergy();
+         System.out.println("energy: " + (energy - currentEnergy));
+         energy = currentEnergy;
+		 }
 		 System.out.println("output2:"+net.getResult());
 		//System.out.println(termsToNeurons);
 		  

@@ -90,12 +90,19 @@ public class Weights implements JSONable, NeuronConst
     public void addInputs(Integer extraNumber)
     {
         Integer newIn = inNumber + extraNumber;
-        double[][] temp = new double[newIn][outNumber]; 
+        double[][] temp = new double[newIn][outNumber];
         for (int i = 0; i < newIn; i++)
         {
             for (int j = 0; j < outNumber; j++)
             {
-                temp[i][j] = initValue();
+                if (i < inNumber)
+                {
+                    temp[i][j] = weights[i][j];
+                }
+                else
+                {
+                    temp[i][j] = initValue();
+                }
             }
         }
         weights = temp;
@@ -105,12 +112,19 @@ public class Weights implements JSONable, NeuronConst
     public void addOutputs(Integer extraNumber)
     {
         Integer newOut = outNumber + extraNumber;
-        double[][] temp = new double[inNumber][newOut]; 
+        double[][] temp = new double[inNumber][newOut];
         for (int i = 0; i < inNumber; i++)
         {
             for (int j = 0; j < newOut; j++)
             {
-                temp[i][j]= initValue();
+                if (j < outNumber)
+                {
+                    temp[i][j] = weights[i][j];
+                }
+                else
+                {
+                    temp[i][j] = initValue();
+                }
             }
         }
         weights = temp;
@@ -119,14 +133,14 @@ public class Weights implements JSONable, NeuronConst
 
     public void changeWeight(int input, int output, double value)
     {
-        
-//            Key k = new Key(input, output);
-            // Double previousW = dweights.get(k);
-            // if (previousW == null)
-//            Double previousW = 0d;
-//            double deltaW = value + previousW * alpha;
-            weights[input][output] += value;
-            // dweights.put(k, deltaW);
+
+        // Key k = new Key(input, output);
+        // Double previousW = dweights.get(k);
+        // if (previousW == null)
+        // Double previousW = 0d;
+        // double deltaW = value + previousW * alpha;
+        weights[input][output] += value;
+        // dweights.put(k, deltaW);
     }
 
     public Double getWeight(int input, int output)
@@ -140,14 +154,14 @@ public class Weights implements JSONable, NeuronConst
         {
             for (int j = 0; j < outNumber; j++)
             {
-                weights[i][j]= initValue();
+                weights[i][j] = initValue();
             }
         }
     }
 
     public void setWeight(int input, int output, double value)
     {
-        weights[input][output]= value;
+        weights[input][output] = value;
     }
 
     public void removeInputs(List<Integer> inputs)
@@ -158,7 +172,7 @@ public class Weights implements JSONable, NeuronConst
         {
             for (int i = min + delta; i < inNumber; i++)
             {
-                weights[i][ j - delta]= weights[i][ j];
+                weights[i][j - delta] = weights[i][j];
                 // dweights.put(new Key(i, j - delta), weights.get(new Key(i,
                 // j)));
                 // dweights.remove(new Key(i, j));
@@ -176,7 +190,7 @@ public class Weights implements JSONable, NeuronConst
         {
             for (int j = min + delta; j < outNumber; j++)
             {
-                weights[i][j - delta] = weights[i][ j];
+                weights[i][j - delta] = weights[i][j];
                 // dweights.put(new Key(i, j - delta), weights.get(new Key(i,
                 // j)));
                 // dweights.remove(new Key(i, j));
@@ -194,7 +208,7 @@ public class Weights implements JSONable, NeuronConst
         {
             for (int j = 0; j < outNumber; j++)
             {
-                weights[i][j]= initValue();
+                weights[i][j] = initValue();
             }
         }
     }
@@ -208,7 +222,7 @@ public class Weights implements JSONable, NeuronConst
         {
             for (int j = 0; j < this.outNumber; j++)
             {
-                weights[i][j]= initValue();
+                weights[i][j] = initValue();
             }
         }
     }
