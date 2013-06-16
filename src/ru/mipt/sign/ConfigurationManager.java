@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.core.exceptions.NextCommandException;
@@ -66,7 +68,81 @@ public class ConfigurationManager implements NeuronConst
 
     public static void init()
     {
-        init(1, 1);
+        int inputNumber = INPUT_NUMBER;
+        int firstNumber = 100;
+        int secondNumber = 30;
+        init(inputNumber, 1);
+        ApplicationContext appCtx = ApplicationContext.getInstance();
+        NeuroNet nn = appCtx.getNeuroNet();
+        List<BigInteger> inputLayer = nn.getInputNeurons();
+        List<BigInteger> firstLayer = new ArrayList<BigInteger>();
+        List<BigInteger> secondLayer = new ArrayList<BigInteger>();
+        
+        Double average = 0d;
+        for (int i = 0; i < firstNumber; i++)
+        {
+            if (i % 10 == 0)
+            {
+                System.out.println(i+"%");
+            }
+            long time = System.currentTimeMillis();
+            BigInteger neuronID = nn.addNeuron();
+            firstLayer.add(neuronID);
+            for (int j = 0; j < inputNumber; j++)
+            {
+                try
+                {
+                    nn.connectNeuron(inputLayer.get(j), neuronID, 1);
+                } catch (NeuronNotFound e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            average += System.currentTimeMillis() - time;
+//            System.out.println("" + (i+1) + " neuron added. Time: " + average / (i+1));
+        }
+        System.out.println("100%");
+        System.out.println("Average: " + (average/firstNumber));
+        System.out.println("Time: " + (average));
+        System.out.println("First layer created");
+        average = 0d;
+        for (int i = 0; i < secondNumber; i++)
+        {
+            if (i % 3 == 0)
+            {
+                System.out.println((i/3*10)+"%");
+            }
+            long time = System.currentTimeMillis();
+            BigInteger neuronID = nn.addNeuron();
+            secondLayer.add(neuronID);
+            for (int j = 0; j < firstNumber; j++)
+            {
+                try
+                {
+                    nn.connectNeuron(firstLayer.get(j), neuronID, 1);
+                } catch (NeuronNotFound e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            average += System.currentTimeMillis() - time;
+//            System.out.println("" + (i+1) + " neuron added. Time: " + average / (i+1));
+        }
+        System.out.println("100%");
+        System.out.println("Average: " + (average/secondNumber));
+        System.out.println("Time: " + (average));
+        System.out.println("Second layer created");
+        for (int j = 0; j < secondNumber; j++)
+        {
+            try
+            {
+                nn.connectNeuron(secondLayer.get(j), LAST_NEURON_ID, 1);
+            } catch (NeuronNotFound e)
+            {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Ready");
     }
 
     public static void init(Integer inNumber, Integer outNumber)

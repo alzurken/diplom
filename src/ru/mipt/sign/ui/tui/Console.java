@@ -23,7 +23,7 @@ public class Console implements NeuronConst
         {
             public void run()
             {
-                ApplicationContext.getInstance().getMainWindow().display();
+//                ApplicationContext.getInstance().getMainWindow().display();
                 System.out.println("GUI started");
             }
         });
@@ -52,7 +52,7 @@ public class Console implements NeuronConst
             {
                 command.run(commandString);
                 result = command.getResult();
-                ApplicationContext.getInstance().getMainWindow().display();
+//                ApplicationContext.getInstance().getMainWindow().display();
             } catch (NeuronException e)
             {
                 System.out.println(e.toString());

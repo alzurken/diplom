@@ -9,82 +9,105 @@ import java.util.*;
 
 import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
+import ru.mipt.sign.forex.Bar;
+import ru.mipt.sign.forex.HistoryHolder;
+import ru.mipt.sign.forex.Information;
+import ru.mipt.sign.forex.Synchronizer;
 import ru.mipt.sign.neurons.NeuroNet;
+import ru.mipt.sign.neurons.NeuronConst;
 import ru.mipt.sign.neurons.data.InputDataProvider;
 import ru.mipt.sign.neurons.data.impl.InputDataProviderByData;
-import ru.mipt.sign.neurons.data.impl.InputDataProviderByNeuron;
 import ru.mipt.sign.neurons.learn.LearningCenter;
 
-public class NeuroManager
+public class NeuroManager implements NeuronConst
 {
     private final Random random = new Random(System.currentTimeMillis());
-    private static final double start = 10; 
+    private static final double start = 10;
     private static double b = start;
     private static double c = 1;
     private static double prevAccuracy = 0;
+    private static HistoryHolder historyHolder = new HistoryHolder();
 
     public void start()
     {
+        Information information = Synchronizer.read();
+        if (information != null)
+        {
+            for (Bar bar : information.getBars())
+            {
+                historyHolder.add(bar);
+            }
+        }
         System.out.println(new Date(System.currentTimeMillis()));
     }
-    
+
     public void start(Long numberOfSteps) throws NeuronNotFound
     {
         ApplicationContext appCtx = ApplicationContext.getInstance();
         NeuroNet nn = appCtx.getNeuroNet();
         List<Double> result = new ArrayList<Double>();
-        List<Double> rightResult = new ArrayList<Double>();
         // System.out.println("Start processing bars: \n");
 
         FileOutputStream fos;
         try
         {
             final double a = b;
-            nn.setInputProvider(new InputDataProviderByNeuron()
+//            nn.setInputProvider(new InputDataProviderByNeuron()
+//            {
+//                @Override
+//                public List<Double> nextValue()
+//                {
+//                    double x = a / 100;
+//                    List<Double> input = new ArrayList<Double>();
+//                    input.add(x);
+//                    return input;
+//                }
+//            });
+            List<Double> input = new ArrayList<Double>();
+            for (int i = 0; i < INPUT_NUMBER; i++)
             {
-                @Override
-                public List<Double> nextValue()
-                {
-                    double x = a/100;
-                    List<Double> input = new ArrayList<Double>();
-                    input.add(x);
-                    return input;
-                }
-            });
+                input.add(0.1d);
+            }
             for (long s = 0; s < numberOfSteps; s++)
             {
+                long time = System.currentTimeMillis();
+                List<Double> rightResult = new ArrayList<Double>();
+                nn.setInputProvider(new InputDataProviderByData(input, 1));
                 nn.calc();
                 result = nn.getResult();
-                nn.setInputProvider(new InputDataProviderByData(result,1));
-//                rightResult = testFunction(nn.getCurrentInput());
-                Double accuracy = 0d;//getAccuracy(result, rightResult).get(0);
-//                if (Math.abs(100 - accuracy) < 2)
-//                {
-//                    if (b == 40)
-//                        c *= -1;
-//                    b += c;
-//                }
-//                if (b == start)
-//                {
-//                    b = start;
-//                    c = 1;
-//                }
-//                Double eta = 1d;
-//                double error = Math.abs(prevAccuracy - accuracy);
-//                if (error < 1)
-//                {
-//                    eta = 2d;
-//                }
-//                if (error > 50)
-//                {
-//                    eta = 0.5d;
-//                }
-//                prevAccuracy = accuracy;
-//                learn(nn, result, rightResult, eta);
-
+//                nn.setInputProvider(new InputDataProviderByData(result, 1));
+                // rightResult = testFunction(nn.getCurrentInput());
+                Double accuracy = 0d;// getAccuracy(result, rightResult).get(0);
+                // if (Math.abs(100 - accuracy) < 2)
+                // {
+                // if (b == 40)
+                // c *= -1;
+                // b += c;
+                // }
+                // if (b == start)
+                // {
+                // b = start;
+                // c = 1;
+                // }
+                // Double eta = 1d;
+                // double error = Math.abs(prevAccuracy - accuracy);
+                // if (error < 1)
+                // {
+                // eta = 2d;
+                // }
+                // if (error > 50)
+                // {
+                // eta = 0.5d;
+                // }
+                // prevAccuracy = accuracy;
+                rightResult.add(0.5d);
+                Long timeCalc = System.currentTimeMillis() - time;
+                time = System.currentTimeMillis();
+                learn(nn, result, rightResult, 1d);
+                Long timeLearn = System.currentTimeMillis() - time;
                 if (numberOfSteps < 100l)
-                    System.out.println("x: " + nn.getCurrentInput() + " right: " + rightResult + " result: " + result
-                            + " accuracy: " + accuracy);
+                    System.out.println(" right: " + rightResult + " result: " + result
+                            + " accuracy: " + accuracy + " timeCalc: " + timeCalc + " timeLearn: " + timeLearn);
             }
             if (numberOfSteps > 100)
             {
@@ -140,7 +163,7 @@ public class NeuroManager
 
     private Double func(Double x)
     {
-        return  x;
+        return x;
     }
 
     private List<Double> getAccuracy(List<Double> actual, List<Double> right)

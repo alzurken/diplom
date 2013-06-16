@@ -1,9 +1,6 @@
 package ru.mipt.sign.neurons.learn;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.neurons.Connection;
@@ -14,7 +11,7 @@ import ru.mipt.sign.util.comparator.NeuronComparator;
 
 public class WeightAction extends LearningAction
 {
-    private static double eta = 0.02;
+    private final static double eta = 0.02;
 
     public WeightAction(NeuroNet nn, List result, List rightValue)
     {
@@ -23,7 +20,7 @@ public class WeightAction extends LearningAction
 
     public void setEta(double eta)
     {
-        WeightAction.eta *= eta;
+//        WeightAction.eta *= eta;
     }
 
     @Override
@@ -42,35 +39,42 @@ public class WeightAction extends LearningAction
             for (int j = 0; j < n.getInNumber(); j++)
             {
                 double deltaWeight = -eta * input.get(j) * delta;
-                Log.debug("Neuron: " + n.getID() + " deltaWeight: " + deltaWeight + " input: " + input.get(j)
-                        + " delta: " + delta);
+//                Log.debug("Neuron: " + n.getID() + " deltaWeight: " + deltaWeight + " input: " + input.get(j)
+//                        + " delta: " + delta);
                 n.changeWeight(j, 0, deltaWeight);
             }
         }
-
-        TreeSet<Neuron> neuronSet = new TreeSet<Neuron>(new NeuronComparator());
+        System.out.println("Last neurons learned");
+        HashSet<Neuron> neuronSet = new HashSet<Neuron>();
         neuronSet.addAll(lastNeurons);
         while (!neuronSet.isEmpty())
         {
             neuronSet = learnLayer(neuronSet);
+            System.out.println("Layer learned");
         }
     }
 
-    private TreeSet<Neuron> learnLayer(Set<Neuron> zNeurons)
+    private HashSet<Neuron> learnLayer(Set<Neuron> zNeurons)
     {
-        TreeSet<Neuron> neuronSet = new TreeSet<Neuron>(new NeuronComparator());
+        HashSet<Neuron> neuronSet = new HashSet<Neuron>();
         for (Neuron n : zNeurons)
         {
+            if (n.getRole() == INPUT_ROLE)
+                continue;
             List<Connection> connections = nn.getConnectionsForZNeuron(n.getID());
             for (Connection c : connections)
             {
                 Neuron neuron = c.getANeuron();
+                if (neuron.getRole() == INPUT_ROLE)
+                    continue;
                 neuronSet.add(neuron);
             }
         }
 
         for (Neuron n : neuronSet)
         {
+            if (n.getRole() == INPUT_ROLE)
+                continue;
             List<Connection> connections = nn.getConnectionsForANeuron(n.getID());
             for (Connection c : connections)
             {
@@ -84,14 +88,14 @@ public class WeightAction extends LearningAction
                     {
                         deltaSum += next.getWeight(a2zmapping.get(j), k) * next.getDelta(k);
                     }
-                    Log.debug("deltaSum" + deltaSum);
+//                    Log.debug("deltaSum" + deltaSum);
                     double delta = n.getDerivative() * deltaSum;
                     n.setDelta(j, delta);
                     for (int i = 0; i < n.getInNumber(); i++)
                     {
                         double deltaWeight = -eta * n.getInput().get(i) * delta;
-                        Log.debug("Neuron: " + n.getID() + " deltaWeight: " + delta + " input: " + n.getInput().get(i)
-                                + " delta: " + deltaWeight);
+//                        Log.debug("Neuron: " + n.getID() + " deltaWeight: " + delta + " input: " + n.getInput().get(i)
+//                                + " delta: " + deltaWeight);
                         n.changeWeight(i, j, deltaWeight);
                     }
                 }

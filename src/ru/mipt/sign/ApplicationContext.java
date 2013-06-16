@@ -16,7 +16,7 @@ public class ApplicationContext
     private NeuroManager manager;
     private PrintStream out;
     private static ApplicationContext instance = new ApplicationContext();
-    private final MainWindow mainWindow;
+    private MainWindow mainWindow;
     private Timer timer = new Timer();
     
     public static ApplicationContext getInstance()
@@ -31,7 +31,7 @@ public class ApplicationContext
 
     private ApplicationContext()
     {
-        mainWindow = new MainWindow();
+//        mainWindow = new MainWindow();
     }
     
     

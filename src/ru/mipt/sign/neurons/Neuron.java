@@ -17,7 +17,7 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
     private BigInteger id;
     private Element image;
 
-    private Set<Connection> connections;
+    private List<Connection> connections;
     private Weights weights;
     private HashMap<Integer, Double> input;
     private HashMap<Integer, Double> output;
@@ -29,6 +29,11 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
     private double sum = 0d;
     private HashMap<Integer, Double> delta;
 
+    public void setWeight(Integer input, Integer output, Double value)
+    {
+        weights.setWeight(input, output, value);
+    }
+    
     public void setOrder(int order)
     {
         this.order = order;
@@ -181,7 +186,7 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
         output = new HashMap<Integer, Double>();
         weights = new Weights(0, 0);
         weights.setParent(this);
-        connections = new HashSet<Connection>();
+        connections = new ArrayList<Connection>();
         delta = new HashMap<Integer, Double>();
         state = STATE_INIT;
     }
@@ -242,7 +247,10 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
 
     public void changeWeight(int i, int j, double changeValue)
     {
-        weights.changeWeight(i, j, changeValue);
+        if (role != INPUT_ROLE)
+        {
+            weights.changeWeight(i, j, changeValue);
+        }
     }
 
     public void removeInputs(List<Integer> inputs)

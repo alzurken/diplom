@@ -1,10 +1,7 @@
 package ru.mipt.sign.neurons;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.neurons.functions.UnitFunction;
@@ -56,6 +53,11 @@ public class HopfieldNeuroNet extends NeuroNet
             return;
         }
         super.connectNeuron(id1, neuron2out.get(id2), fiber);
+    }
+    
+    public List<BigInteger> getRealNeurons()
+    {
+        return new ArrayList<BigInteger>(neuron2out.keySet()); 
     }
     
     private BigInteger getNextOutID()

@@ -7,18 +7,12 @@ import java.io.IOException;
 
 public class Synchronizer
 {
-    private String input = "1.txt";
-    private String output = "2.txt";
+    private static final String path = "C:\\Program Files (x86)\\MetaTrader - E-Global Trade & Finance Group\\experts\\files\\";
+    private static final String input  = path + "1.txt";
+    private static final String output = path + "2.txt";
     
-    public Synchronizer()
+    public static Information read()
     {
-        
-    }
-    
-    public Information read()
-    {
-        File out = new File(output);
-        out.delete();
         File file = new File(input);
         int ch;
         StringBuffer strContent = new StringBuffer("");
@@ -36,10 +30,8 @@ public class Synchronizer
         }
     }
     
-    public void write(String out)
+    public static void write(String out)
     {
-        File in = new File(input);
-        in.delete();
         File f = new File(output);
         f.setWritable(true);
         try
@@ -50,5 +42,7 @@ public class Synchronizer
         } catch (IOException e)
         {
         }
+        File in = new File(input);
+        in.delete();
     }
 }

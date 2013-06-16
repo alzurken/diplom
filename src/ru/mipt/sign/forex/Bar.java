@@ -7,13 +7,14 @@ import java.util.List;
 
 public class Bar
 {
-    private Double open;
-    private Double close;
-    private Double high;
-    private Double low;
+    private double open;
+    private double close;
+    private double high;
+    private double low;
     private Date timestamp;
 
-    public Bar(Date date, Double open, Double close, Double low, Double high) {
+    public Bar(Date date, double open, double close, double low, double high)
+    {
         super();
         timestamp = date;
         this.open = open;
@@ -22,47 +23,57 @@ public class Bar
         this.low = low;
     }
 
+    public Bar(String input)
+    {
+        String [] temp = input.split(";");
+        this.timestamp = new Date(Long.parseLong(temp[0]));
+        open = Double.parseDouble(temp[1]);
+        close = Double.parseDouble(temp[2]);
+        high = Double.parseDouble(temp[3]);
+        low = Double.parseDouble(temp[4]);
+    }
+
     public Date getTimestamp()
     {
         return timestamp;
     }
 
-    public Double getOpen()
+    public double getOpen()
     {
         return open;
     }
 
-    public Double getClose()
+    public double getClose()
     {
         return close;
     }
 
-    public Double getHigh()
+    public double getHigh()
     {
         return high;
     }
 
-    public Double getLow()
+    public double getLow()
     {
         return low;
     }
 
-    public Double minusOpen(Bar bar)
+    public double minusOpen(Bar bar)
     {
         return (this.open - bar.open);
     }
 
-    public Double minusClose(Bar bar)
+    public double minusClose(Bar bar)
     {
         return (this.close - bar.close);
     }
 
-    public Double minusLow(Bar bar)
+    public double minusLow(Bar bar)
     {
         return (this.low - bar.low);
     }
 
-    public Double minusHigh(Bar bar)
+    public double minusHigh(Bar bar)
     {
         return (this.high - bar.high);
     }

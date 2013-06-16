@@ -25,21 +25,35 @@ public class NeuroNet implements JSONable, NeuronConst
 {
     private BigInteger currentID;
     protected HashMap<BigInteger, Neuron> neuroPool;
-    private Set<Connection> connPool;
+    private List<Connection> connPool;
     protected TreeSet<Neuron> inputNeurons; // id, number
     protected int inputNumber;
     protected int outputNumber;
     protected TreeSet<Neuron> outputNeurons;
     protected InputDataProvider inputProvider;
     private List<Double> currentInput;
+    private Map<BigInteger, List<Connection>> cacheConnectionsForANeuron;
+    private Map<BigInteger, List<Connection>> cacheConnectionsForZNeuron;
 
     {
         currentID = BigInteger.valueOf(0);
         neuroPool = new HashMap<BigInteger, Neuron>();
-        connPool = new HashSet<Connection>();
+        connPool = new ArrayList<Connection>();
         inputNeurons = new TreeSet<Neuron>(new OrderComparator());
         outputNeurons = new TreeSet<Neuron>(new OrderComparator());
         currentInput = new ArrayList<Double>();
+        cacheConnectionsForANeuron = new HashMap<BigInteger, List<Connection>>();
+        cacheConnectionsForZNeuron = new HashMap<BigInteger, List<Connection>>();
+    }
+
+    public List<BigInteger> getInputNeurons()
+    {
+        List<BigInteger> result = new ArrayList<BigInteger>();
+        for (Neuron n : inputNeurons)
+        {
+            result.add(n.getID());
+        }
+        return result;
     }
 
     public int getOutputNumber()
@@ -65,10 +79,18 @@ public class NeuroNet implements JSONable, NeuronConst
     public List<Connection> getConnectionsForZNeuron(BigInteger id)
     {
         List<Connection> result = new ArrayList<Connection>();
-        for (Connection c : connPool)
+        if (cacheConnectionsForZNeuron.get(id) != null)
         {
-            if (c.getZID().equals(id))
-                result.add(c);
+            result = cacheConnectionsForZNeuron.get(id);
+        }
+        else
+        {
+            for (Connection c : connPool)
+            {
+                if (c.getZID().equals(id))
+                    result.add(c);
+            }
+            cacheConnectionsForZNeuron.put(id, result);
         }
         return result;
     }
@@ -76,10 +98,18 @@ public class NeuroNet implements JSONable, NeuronConst
     public List<Connection> getConnectionsForANeuron(BigInteger id)
     {
         List<Connection> result = new ArrayList<Connection>();
-        for (Connection c : connPool)
+        if (cacheConnectionsForANeuron.get(id) != null)
         {
-            if (c.getAID().equals(id))
-                result.add(c);
+            result = cacheConnectionsForANeuron.get(id);
+        }
+        else
+        {
+            for (Connection c : connPool)
+            {
+                if (c.getAID().equals(id))
+                    result.add(c);
+            }
+            cacheConnectionsForANeuron.put(id, result);
         }
         return result;
     }
@@ -214,33 +244,33 @@ public class NeuroNet implements JSONable, NeuronConst
 
     public void connectNeuron(BigInteger id1, BigInteger id2, int fiber) throws NeuronNotFound
     {
-        Neuron n1 = getNeuron(id1);
+        // Neuron n1 = getNeuron(id1);
         Connection conn = null;
-        if (!n1.connectedTo(id2))
-        {
-            conn = new Connection(this);
-            connPool.add(conn);
-        }
-        else
-        {
-            for (Connection c : connPool)
-            {
-                if ((c.getAID().equals(id1)) && (c.getZID().equals(id2)))
-                {
-                    conn = c;
-                    break;
-                }
-            }
-        }
-        if (conn != null)
-            conn.connect(id1, id2, fiber);
+        // if (!n1.connectedTo(id2))
+        // {
+        conn = new Connection(this);
+        connPool.add(conn);
+        // }
+        // else
+        // {
+        // for (Connection c : connPool)
+        // {
+        // if ((c.getAID().equals(id1)) && (c.getZID().equals(id2)))
+        // {
+        // conn = c;
+        // break;
+        // }
+        // }
+        // }
+        // if (conn != null)
+        conn.connect(id1, id2, fiber);
     }
 
     protected NeuroNet()
     {
-        
+
     }
-    
+
     public NeuroNet(JsonObject json)
     {
         inputNumber = json.get("inputNumber").getAsInt();
@@ -265,7 +295,7 @@ public class NeuroNet implements JSONable, NeuronConst
             connPool.add(c);
         }
     }
-    
+
     public NeuroNet(Integer inNumber, Integer outNumber)
     {
         this.inputNumber = inNumber;
@@ -373,7 +403,7 @@ public class NeuroNet implements JSONable, NeuronConst
         currentID = currentID.add(BigInteger.valueOf(1));
         return currentID;
     }
-    
+
     public Neuron getNeuron(BigInteger id) throws NeuronNotFound
     {
         if (neuroPool.get(id) == null)
@@ -476,7 +506,6 @@ public class NeuroNet implements JSONable, NeuronConst
         return out.toString();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JsonObject getJSON()
     {

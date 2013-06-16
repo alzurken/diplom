@@ -8,6 +8,7 @@ import java.util.TimerTask;
 
 import ru.mipt.sign.ApplicationContext;
 import ru.mipt.sign.core.exceptions.NeuronException;
+import ru.mipt.sign.core.exceptions.NeuronNotFound;
 
 public class StartCommand extends Command
 {
@@ -19,21 +20,30 @@ public class StartCommand extends Command
         String[] temp = command.split(" ");
         if (temp.length == 1)
         {
-            numberOfSteps = 1000l;
+            numberOfSteps = null;
         }
         else
         {
             numberOfSteps = Long.valueOf(temp[1]);
         }
-        ApplicationContext.getInstance().getTimer().schedule(new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                ApplicationContext.getInstance().getManager().start();
-            }
-        }, 0, DELAY);
+        final Long param = numberOfSteps;
+//        ApplicationContext.getInstance().getTimer().schedule(new TimerTask()
+//        {
+//            @Override
+//            public void run()
+//            {
+//                if (param == null)
+//                {
+//                    ApplicationContext.getInstance().getManager().start();
+//                }
+//                else
+//                {
+//                    System.out.println("Processing stopped");
+//                }
+//            }
+//        }, 0, DELAY);
         System.out.println("Processing started");
+        ApplicationContext.getInstance().getManager().start(param);
     }
 
     @Override

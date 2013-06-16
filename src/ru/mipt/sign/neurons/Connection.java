@@ -17,6 +17,8 @@ public class Connection implements JSONable
 {
     private Neuron aNeuron;
     private Neuron zNeuron;
+    private BigInteger aID;
+    private BigInteger zID;
     private Map<Integer, Integer> a2zMapping;
     private NeuroNet parent;
     
@@ -144,8 +146,10 @@ public class Connection implements JSONable
         try
         {
             aNeuron = nn.getNeuron(json.get("aNeuron").getAsBigInteger());
+            aID = aNeuron.getID();
             aNeuron.addConnection(this);
             zNeuron = nn.getNeuron(json.get("zNeuron").getAsBigInteger());
+            zID = zNeuron.getID();
         } catch (NeuronNotFound e)
         {
             e.printStackTrace();
@@ -176,8 +180,10 @@ public class Connection implements JSONable
     public void connect(BigInteger aNeuronID, BigInteger zNeuronID, int fiber) throws NeuronNotFound
     {
         aNeuron = parent.getNeuron(aNeuronID);
+        aID = aNeuronID;
         aNeuron.addConnection(this);
         zNeuron = parent.getNeuron(zNeuronID);
+        zID = zNeuronID;
         List<Integer> aSide = aNeuron.getUnboundOutputs(fiber); // set output
                                                                 // number resize
                                                                 // neuron
@@ -240,19 +246,19 @@ public class Connection implements JSONable
         if (getClass() != obj.getClass())
             return false;
         Connection other = (Connection) obj;
-        if (aNeuron == null)
+        if (aID == null)
         {
-            if (other.aNeuron != null)
+            if (other.aID != null)
                 return false;
         }
-        else if (!aNeuron.equals(other.aNeuron))
+        else if (!aID.equals(other.aID))
             return false;
-        if (zNeuron == null)
+        if (zID == null)
         {
-            if (other.zNeuron != null)
+            if (other.zID != null)
                 return false;
         }
-        else if (!zNeuron.equals(other.zNeuron))
+        else if (!zID.equals(other.zID))
             return false;
         return true;
     }
