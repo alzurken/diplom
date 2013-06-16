@@ -37,6 +37,8 @@ import com.sun.syndication.io.XmlReader;
 public class RSSParser implements NeuronConst
 {
     private List<INews> news_list = new ArrayList<INews>();
+    private Map <String, String> mapSiteDate = new HashMap(); 
+    /* map site , date of latest new*/
     private URL url;
     private String path = DEFAULT_CONF_PATH + "News" + ".xml";
     private Element newsBaseXml = new Element("AllNews");

@@ -17,10 +17,10 @@ public class Runner
 	public static void main(String[] args) throws NextCommandException, IOException, ParseException
 	{
 		RSSParser test = new RSSParser();
+		test.getNews();
+		test.Save();
 		test.LoadText();
-		System.out.println(test.LoadText()); 
-		//test.getNews();
-		//test.Save();
+		//System.out.println(test.LoadText()); 
 		// TODO Auto-generated method stub
 
 	}

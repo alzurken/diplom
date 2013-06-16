@@ -18,6 +18,8 @@ public class New
 
     private Iterator<News> newsIt;
     private News curNew;
+    private NewsVector tmp = new NewsVector();
+    public  Map<String,Double> fullBasis;
 
     
     public New() throws NextCommandException, IOException, ParseException {
@@ -27,33 +29,36 @@ public class New
    	    curNew = newsIt.next();
     }
     
+    public void updateFullBasis() throws NextCommandException, IOException, ParseException
+    {
+    	this.fullBasis = tmp.GetSortedFullBasisFreq();
+    }
+
     
     public String getDateOfNew()
     {
         return curNew.getDate();
     }
 
-    public Map<String,Double> getVectorOfNewInNewBasis() throws NextCommandException, NeuronNotFound, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException 
+    public Map<String,Double> getVectorOfNewInSmallBasis() throws NextCommandException, NeuronNotFound, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException 
     {
-    	NewsVector tmp = new NewsVector();
-        return tmp.BuildFinalVectorForOneNew(curNew);
+    	  return tmp.BuildFinalVectorForOneNew(curNew);
     }
-    
-    public List<Double> getVectorOfNewInFullBasis() throws NextCommandException, NeuronNotFound, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException 
+    /*
+    public List<Double> extendVectorOfNewToFullBasis(Map<String,Double> VectorOfNew) throws NextCommandException, NeuronNotFound, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException 
     {
-    	NewsVector tmp = new NewsVector();
-    	Map<String, Double> mapInNewBasis = tmp.BuildFinalVectorForOneNew(curNew);
-        Map<String,Double> fullBasis = tmp.GetTermsBasisForAllNews();
-        Map<String,Double> mergedMap = new HashMap();
+    	        
+        Map<String,Double> mergedMap = new HashMap<String, Double>();
         mergedMap.putAll(fullBasis);
-        mergedMap.putAll(mapInNewBasis);
+        mergedMap.putAll(VectorOfNew);
         //System.out.println(mapInNewBasis);
         //System.out.println(fullBasis.keySet());
         // System.out.println(mergedMap.keySet());
-        List<Double> thisOutput = new ArrayList(mergedMap.values());
+        List<Double> thisOutput = new ArrayList<Double>(mergedMap.values());
         
     	return thisOutput;
     }
+    */
     
     public boolean NextNew () {
     	if (newsIt.hasNext()) {

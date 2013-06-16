@@ -34,7 +34,8 @@ public class NewsVector {
 	// or just build one vector from one new
 	
 	
-	
+	public Map <String,Double> termsAndFreqs = new HashMap<String, Double>();
+	public Map <String,Double> termsWithZeroFreqs = new HashMap<String, Double>();
 	public static final FieldType TYPE_STORED = new FieldType();
 
 	
@@ -60,50 +61,9 @@ public class NewsVector {
 	 */
 	    
 	   
-	    public  Map<String,Double> GetTermsBasisForAllNews() throws NextCommandException, IOException, ParseException
+	    public  Map<String,Double> GetSortedFullBasisFreq() throws NextCommandException, IOException, ParseException
 	    {
-	    	 Directory index = new RAMDirectory();
-	    	 Map <String,Double> termsAndFreqs = new HashMap<String, Double>();
-	    	
-	    	 RSSParser rsspars = new RSSParser();
-	    	 List<News> newsList = rsspars.LoadText();
-			 List<String> StringList = new ArrayList<String>(); 
-			 
-			 for (Iterator<News> it = newsList.iterator(); it.hasNext();) {
-				 StringList.add(it.next().getText());
-			 }
-			 
-			 StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
-		     // 1. create the index
-		     IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_CURRENT, analyzer);
-		     IndexWriter w = new IndexWriter(index, config);
-		     
-		     int documentId=0;
-		     for (Iterator<String> it = StringList.iterator(); it.hasNext();)
-	         {
-		    	documentId++;
-		    	String s = it.next().toLowerCase().replaceAll("\n|\r\n", " ");
-		    	addDoc(w, s, Integer.toString(documentId));
-	         }
-		     w.close();
-		     
-	    	 IndexReader reader = DirectoryReader.open(index);
-		   	      
-		     for (int docId = 0;docId<reader.numDocs();docId++) {
-		       	 Terms vector = reader.getTermVector(docId, "text");
-		    	 TermsEnum termsEnum = null;
-		    	 termsEnum = vector.iterator(termsEnum);
-		    	 BytesRef text = null;
-		    	 while ((text = termsEnum.next()) != null) {
-		    		 String term = text.utf8ToString();
-		    		 double freq = (double) termsEnum.totalTermFreq();
-		    		 double oldfreq = termsAndFreqs.get(term) == null? 0 : termsAndFreqs.get(term);
-		    	     termsAndFreqs.put(term, freq+oldfreq);		    	     
-		    	 }
-		     }
-		    	     
-		     reader.close();
-		     
+	    	 		     
 		     ValueComparator bvc =  new ValueComparator(termsAndFreqs);
 		     TreeMap<String,Double> sorted_map = new TreeMap<String,Double>(bvc);
 		     sorted_map.putAll(termsAndFreqs);
@@ -144,6 +104,9 @@ public class NewsVector {
 		    	     int freq = (int) termsEnum.totalTermFreq();
 		    	     Double freq2 = (double)freq;
 		    	     frequencies.put(term, freq2);
+		    	     double oldfreq = termsAndFreqs.get(term) == null? 0 : termsAndFreqs.get(term);
+		    	     termsAndFreqs.put(term, oldfreq+freq);
+		    	     termsWithZeroFreqs.put(term, 0.0);
 		    	     termsInDoc.put(term, termId);
 		    	     termId++;
 		    	 }
