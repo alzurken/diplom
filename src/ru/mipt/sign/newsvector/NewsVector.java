@@ -1,7 +1,9 @@
 package ru.mipt.sign.newsvector;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,8 +13,13 @@ import java.util.Set;
 
 import org.jdom.Element;
 
+import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.core.exceptions.NextCommandException;
+import ru.mipt.sign.data.impl.InputDataProviderByData;
 import ru.mipt.sign.parser.RSSParser;
+
+import ru.mipt.sign.neurons.HopfieldNeuroNet;
+import ru.mipt.sign.neurons.Neuron;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -34,10 +41,13 @@ import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.DocIdSetIterator;
+import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
+import org.apache.lucene.search.TotalHitCountCollector;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.search.similarities.TFIDFSimilarity;
@@ -66,8 +76,9 @@ public class NewsVector {
 	 * @throws IOException 
 	 * @throws NextCommandException 
 	 * @throws org.apache.lucene.queryparser.classic.ParseException 
+	 * @throws NeuronNotFound 
 	 */
-	public  void GetIndexOfNews() throws IOException, ParseException, NextCommandException, org.apache.lucene.queryparser.classic.ParseException
+	public  void GetIndexOfNews() throws IOException, ParseException, NextCommandException, org.apache.lucene.queryparser.classic.ParseException, NeuronNotFound
 	{
 		RSSParser rsspars = new RSSParser();
 		List<String> StringList = rsspars.LoadText();
@@ -87,59 +98,119 @@ public class NewsVector {
          {
 	    	 documentId++;
 	    	String s = it.next().replaceAll("\n|\r\n", " ");
-	    	//System.out.println(Integer.toString(documentId)+" "+s);
+	    	System.out.println(Integer.toString(documentId)+" "+s);
 	    	addDoc(w, s, Integer.toString(documentId));
          }
 	     
 	     w.close();
 	     
 	     // 2. query
-	     String querystr = "firm";
+	    
 
 	     // the "title" arg specifies the default field to use
 	     // when no field is explicitly specified in the query.
-	     Query q = new QueryParser(Version.LUCENE_CURRENT, "text", analyzer).parse(querystr);
-
+	    
 	     // 3. search
 	     int hitsPerPage = 10;
 	     IndexReader reader = DirectoryReader.open(index);
-	     Set<String> terms = new HashSet<String>();
-	     for (int docId = 1;docId<documentId;docId++) {
+	     Set<String> terms = new HashSet<String>();    // базис термов
+	     for (int docId = 0;docId<documentId;docId++) {
 	    
 	    	 Terms vector = reader.getTermVector(docId, "text");
 	    	 TermsEnum termsEnum = null;
 	    	 termsEnum = vector.iterator(termsEnum);
-	    	 Map<String, Integer> frequencies = new HashMap<String, Integer>();
-	    	
+	    	 Map<String, Double> frequencies = new HashMap<String, Double>(); // freqs map
+	    	 Map<String, Integer> termsInDoc = new HashMap<String, Integer>(); // terms map with Ids
+	    	 int termId = 0;
 	    	 BytesRef text = null;
 	    	 while ((text = termsEnum.next()) != null) {
 	    	     String term = text.utf8ToString();
 	    	     int freq = (int) termsEnum.totalTermFreq();
-	    	     frequencies.put(term, freq);
+	    	     Double freq2 = (double)freq;
+	    	     frequencies.put(term, freq2);
+	    	     termsInDoc.put(term, termId);
+	    	     termId++;
 	    	     terms.add(term);
-	    	 }
 	    	     
-	     }
-	     
-	     System.out.println(terms);
-	     
-	     IndexSearcher searcher = new IndexSearcher(reader);
-	     TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
-	     searcher.search(q, collector);
-	     ScoreDoc[] hits = collector.topDocs().scoreDocs;
-	     
-	     // 4. display results
-	     System.out.println("Found " + hits.length + " hits.");
-	     for(int i=0;i<hits.length;++i) {
-	       int docId = hits[i].doc;
-	       Document d = searcher.doc(docId);
-	       System.out.println((i + 1) + ". " + d.get("documentId") + "\t" + d.get("text"));
-	     }
+	    	 }
+	    	
+	    	 //from here building correaltion matrix
+	    	 //working in 1 document not in all index
+	    	 double[][] corMatrix = new double[termsInDoc.size()][termsInDoc.size()];
+	    	 
+	    	 
+	    	 Directory index2 = new RAMDirectory();
+		     IndexWriterConfig config2 = new IndexWriterConfig(Version.LUCENE_CURRENT, analyzer);
+		     IndexWriter w2 = new IndexWriter(index2, config2);
+		     w2.addDocument(reader.document(docId));  //adding current doc and search in it
+		     w2.close();
+		     IndexReader reader2 = DirectoryReader.open(index2);
+	    	 
+		     for (String term1 : termsInDoc.keySet()) 
+	    	 {
+	    		 for (String term2 : termsInDoc.keySet())
+	    		 {
+	    			 if (term1!=term2) {
+	    				 IndexSearcher searcher = new IndexSearcher(reader2);
+		    			 String querystr = "\""+term1+" "+term2+"\"~6";
+		    			 Query q = new QueryParser(Version.LUCENE_CURRENT, "text", analyzer).parse(querystr);  
+		    			// TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+		    		     //TotalHitCountCollector collector = new TotalHitCountCollector();
+		    			 TopDocs topDocs = searcher.search(q, 10);
+		    			//System.out.println(term1+" "+term2);
+		    			
+		    			 
+		    			 for (int i = 0; i < topDocs.totalHits; i++) {
+		    		            ScoreDoc match = topDocs.scoreDocs[i];
+		    		            //System.out.println("match.score: " + match.score);
+		    		            //Explanation explanation = searcher.explain(q, match.doc); //#1
+		    		            //System.out.println("----------");
+		    		           // Document doc = searcher.doc(match.doc);
+		    		           // System.out.println(doc.get("text"));
+		    		           // System.out.println(explanation.toString());
+		    		        
+		    			 }
+		    			 if (topDocs.totalHits == 0)  corMatrix[termsInDoc.get(term1)][termsInDoc.get(term2)]=0;
+		    			 else 
+		    				 {
+		    				 ScoreDoc match = topDocs.scoreDocs[0];
+		    				 corMatrix[termsInDoc.get(term1)][termsInDoc.get(term2)]=match.score;
+		    				 }
+	    			 //searcher.search(q, collector);
+   		     	   // ScoreDoc[] hits = collector.topDocs().scoreDocs;
+		    		    
+		    		    // System.out.println(collector.getTotalHits());
+			    		    
+	    			 } else
+	    			 {
+	    				 corMatrix[termsInDoc.get(term1)][termsInDoc.get(term2)]=0;
+	    			 }
+	    			 
 
-	     // reader can only be closed when there
-	     // is no need to access the documents any more.
+	    		 }
+	    		 
+	    		 
+	    	 }
+	    	 /*
+	    	 System.out.println(docId);
+	    	 for (int i = 0; i <corMatrix.length; i++) {
+	    		 for (int j = 0; j <corMatrix.length; j++) 
+	    	 System.out.print(corMatrix[i][j]+"\t");
+	    		 System.out.println();
+	    	 }
+*/
+		     BuildHopsfieldByVector(frequencies,termsInDoc,corMatrix);
+	    	 
+	    	 
+	    	    
+	     
+	     }
+	     System.out.println(terms);
+	     System.out.println(terms.size());
+	         
 	     reader.close();
 	}
+	
 	
 	
 	private static void addDoc(IndexWriter w, String text, String documentId) throws IOException {
@@ -154,5 +225,53 @@ public class NewsVector {
 	     //doc.add(new StringField("isbn", isbn, Field.Store.YES));
 	     w.addDocument(doc);
 	   }
+	
+	public  void BuildHopsfieldByVector( Map<String, Double> frequencies,  Map<String, Integer> termsInDoc, double[][] corMatrix ) throws IOException, ParseException, NextCommandException, org.apache.lucene.queryparser.classic.ParseException, NeuronNotFound
+	{
+		HopfieldNeuroNet net = new HopfieldNeuroNet(frequencies.size());
+		List<BigInteger> neurons = net.getRealNeurons();
+		Set<String> terms = frequencies.keySet();
+		Iterator<String> it = terms.iterator();
+		Map<String, BigInteger>  termsToNeurons = new HashMap<String, BigInteger>(); // neurons - terms connection
+		Iterator<BigInteger> it2 = neurons.iterator();
+		
+		while (it.hasNext()) {
+			termsToNeurons.put(it.next(),it2.next());
+		}
+		
+		
+		 for (String term1 : termsInDoc.keySet()) 
+    	 {
+    		 for (String term2 : termsInDoc.keySet())
+    		 {
+    			 if (term1!=term2) {
+    				double weightFromMatrix = corMatrix[termsInDoc.get(term1)][termsInDoc.get(term2)];
+    				if (weightFromMatrix!=0) {
+	    				
+						net.connectNeuron(termsToNeurons.get(term1), termsToNeurons.get(term2), 1)	;
+						Neuron neur = net.getNeuron(termsToNeurons.get(term1));
+						neur.setWeight(0, neur.getOutNumber()-1, weightFromMatrix);
+	    				
+    				}
+	    		 }
+	    			
+    		 }
+    	 }
+		 
+		 List<Double> inputData = new ArrayList<Double> (frequencies.values());
+		 net.setInputProvider(new InputDataProviderByData(inputData, 1));
+		 net.calc();
+		 System.out.println("input:"+inputData);
+		 System.out.println("output1:"+net.getResult());
+		 List<Double> result = net.getResult();
+		 net.setInputProvider(new InputDataProviderByData(result,1));
+		 net.calc();
+		
+		 System.out.println("output2:"+net.getResult());
+		//System.out.println(termsToNeurons);
+		  
+		
+	}
 
+		
 }
