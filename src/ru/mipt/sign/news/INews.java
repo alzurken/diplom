@@ -9,7 +9,7 @@ public interface INews
 {
 
 	public String getText();
-	public Date getDate();
+	public String getDate();
 	public String getSource();
 	public Element getXml();
 	//public Double getAmplitude();

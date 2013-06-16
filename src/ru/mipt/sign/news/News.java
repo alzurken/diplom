@@ -1,14 +1,23 @@
 package ru.mipt.sign.news;
 
+import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
+import org.jdom.DataConversionException;
 import org.jdom.Element;
+
+import ru.mipt.sign.core.SObject;
 
 public class News  implements INews
 {
 
 	private String text; // original text
-	private Date date; // original date
+	private String date; // original date
 	private String source; // original source
 	
 	//private Vector<Double> vector; // result vector
@@ -19,7 +28,7 @@ public class News  implements INews
 	//	return amplitude * Math.exp(-t / amplitude);
 	//}
 
-	public News(String text, Date date, String source)
+	public News(String text, String date, String source)
 	{
 		super();
 		this.text = text;
@@ -31,7 +40,7 @@ public class News  implements INews
 	{
 		return text;
 	}
-	public Date getDate()
+	public String getDate()
 	{
 		return date;
 	}
@@ -59,7 +68,7 @@ public class News  implements INews
 			sourceXml.setAttribute("source", source);
 			newsXml.addContent(sourceXml);
 			Element dateXml = new Element("date");
-			dateXml.setAttribute("date", date.toString());
+			dateXml.setAttribute("date", date);
 			newsXml.addContent(dateXml);
 			Element textXml = new Element("text");
 			

@@ -20,7 +20,7 @@ public class Runner
 	public static void main(String[] args) throws NextCommandException, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException, NeuronNotFound
 	{
 		NewsVector tmp= new NewsVector();
-		tmp.GetIndexOfNews();
+		//System.out.println(tmp.GetTermBasis());
 
 
 	}

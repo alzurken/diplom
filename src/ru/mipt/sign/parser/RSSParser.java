@@ -11,8 +11,10 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -80,9 +82,9 @@ public class RSSParser implements NeuronConst
         }
     }
 
-    public List<String> LoadText() throws IOException, ParseException
+    public List<News> LoadText() throws IOException, ParseException    // map of text and dates
     {
-        List<String> news = new ArrayList<String>();
+        List<News> news = new ArrayList<News>();
         try
         {
             XPath xpath;
@@ -101,7 +103,13 @@ public class RSSParser implements NeuronConst
 
                     for (Iterator<Element> it2 = res2.iterator(); it2.hasNext();)
                     {
-                        news.add(it2.next().getChild("text").getAttributeValue("text"));
+                    	Element curEl= it2.next();
+                    	String text = curEl.getChild("text").getAttributeValue("text");
+                    	String date = curEl.getChild("date").getAttributeValue("date");
+                    	String source = curEl.getChild("source").getAttributeValue("source");
+                    	News curNew = new News(text,date,source);
+                    	
+                        news.add(curNew);
 
                         // System.out.println(it2.next().getChild("text").getAttributeValue("text"));
                         /*
@@ -187,7 +195,7 @@ public class RSSParser implements NeuronConst
                 {
                     SyndEntry entry = i.next();
 
-                    Date date = entry.getPublishedDate();
+                    String date = entry.getPublishedDate().toString();
                     String text = entry.getDescription().getValue().replaceAll("\\<.*?\\>", "")
                             .replaceAll("\\&.*?\\;", "");
                     News curNew = new News(text, date, rssSite);
