@@ -30,4 +30,10 @@ public class InputDataProviderByData implements InputDataProvider
         return result;
     }
 
+    @Override
+    public void refresh()
+    {
+        currentIn = 0;
+    }
+
 }

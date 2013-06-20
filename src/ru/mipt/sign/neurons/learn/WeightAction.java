@@ -11,18 +11,23 @@ import ru.mipt.sign.util.comparator.NeuronComparator;
 
 public class WeightAction extends LearningAction
 {
-    private final static double eta = 0.02;
+    private static double eta = ETA;
 
     public WeightAction(NeuroNet nn, List result, List rightValue)
     {
         super(nn, result, rightValue);
     }
 
-    public void setEta(double eta)
+    public void changeEta(double eta)
     {
-//        WeightAction.eta *= eta;
+        WeightAction.eta *= eta;
     }
 
+    public static void setEta(double eta)
+    {
+        WeightAction.eta = eta;
+    }
+    
     @Override
     public void perform() throws NeuronNotFound
     {
@@ -44,13 +49,13 @@ public class WeightAction extends LearningAction
                 n.changeWeight(j, 0, deltaWeight);
             }
         }
-        System.out.println("Last neurons learned");
+//        System.out.println("Last neurons learned");
         HashSet<Neuron> neuronSet = new HashSet<Neuron>();
         neuronSet.addAll(lastNeurons);
         while (!neuronSet.isEmpty())
         {
             neuronSet = learnLayer(neuronSet);
-            System.out.println("Layer learned");
+//            System.out.println("Layer learned");
         }
     }
 

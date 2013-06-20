@@ -5,8 +5,9 @@ import java.util.Random;
 
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
 import ru.mipt.sign.neurons.NeuroNet;
+import ru.mipt.sign.neurons.NeuronConst;
 
-public class LearningCenter
+public class LearningCenter implements NeuronConst
 {
     private Random random = new Random(System.currentTimeMillis());
     private Integer learnType;
@@ -61,7 +62,7 @@ public class LearningCenter
             break;
         case TYPE_WEIGHT:
             action = new WeightAction(nn, result, rightValue);
-            ((WeightAction) action).setEta(eta);
+            ((WeightAction) action).changeEta(eta);
             break;
         case TYPE_CONNECT:
             action = new ConnectAction(nn, result, rightValue);

@@ -17,5 +17,8 @@ public interface NeuronConst
     public static final Integer DEFAULT_FIBER_NUMBER = 4;
     public static final BigInteger LAST_NEURON_ID = new BigInteger("100000000000");
     public static final long DELAY = 60000l;
-    public static final Integer INPUT_NUMBER = 10000;
+    public static final Double ETA = 0.04;
+    public static final Integer INPUT_NUMBER = 1000;
+    public static final Integer FIRST_NUMBER = 100;
+    public static final Integer SECOND_NUMBER = 30;
 }

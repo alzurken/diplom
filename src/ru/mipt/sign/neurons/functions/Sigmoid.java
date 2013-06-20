@@ -4,7 +4,7 @@ import ru.mipt.sign.core.exceptions.CalculationException;
 
 public class Sigmoid implements ActivationFunction
 {
-    private double alpha = 0.1;
+    private double alpha = 0.5;
 
     @Override
     public double getValue(double x)

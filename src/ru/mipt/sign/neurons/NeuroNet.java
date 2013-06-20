@@ -45,6 +45,12 @@ public class NeuroNet implements JSONable, NeuronConst
         cacheConnectionsForANeuron = new HashMap<BigInteger, List<Connection>>();
         cacheConnectionsForZNeuron = new HashMap<BigInteger, List<Connection>>();
     }
+    
+    private void resetCache()
+    {
+        cacheConnectionsForANeuron = new HashMap<BigInteger, List<Connection>>();
+        cacheConnectionsForZNeuron = new HashMap<BigInteger, List<Connection>>();
+    }
 
     public List<BigInteger> getInputNeurons()
     {
@@ -228,11 +234,13 @@ public class NeuroNet implements JSONable, NeuronConst
                 this.removeConnection(c);
             }
         }
+        resetCache();
         return neuroPool.remove(id) != null ? 0 : 1;
     }
 
     public void removeConnection(Connection c)
     {
+        resetCache();
         c.disconnect();
         connPool.remove(c);
     }
@@ -254,6 +262,7 @@ public class NeuroNet implements JSONable, NeuronConst
 
     public void connectNeuron(BigInteger id1, BigInteger id2, int fiber) throws NeuronNotFound
     {
+        resetCache();
         // Neuron n1 = getNeuron(id1);
         Connection conn = null;
         // if (!n1.connectedTo(id2))

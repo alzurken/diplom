@@ -5,4 +5,6 @@ import java.util.List;
 public interface InputDataProvider
 {
     public List<Double> getNextInput();
+    
+    public void refresh();
 }

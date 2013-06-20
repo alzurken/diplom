@@ -229,7 +229,7 @@ public class Weights implements JSONable, NeuronConst
 
     public double initValue()
     {
-        return 2 * random.nextDouble() - 1;
+        return (2 * random.nextDouble() - 1);
     }
 
     public int getInNumber()
