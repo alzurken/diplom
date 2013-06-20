@@ -16,7 +16,7 @@ public class Runner
 	 */
 	public static void main(String[] args) throws NextCommandException, IOException, ParseException
 	{
-		RSSParser test = new RSSParser();
+		RSSParser test = new RSSParser("News");
 		test.getNews();
 		test.Save();
 		test.LoadText();

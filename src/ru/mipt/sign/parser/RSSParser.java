@@ -1,20 +1,9 @@
 package ru.mipt.sign.parser;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -25,7 +14,6 @@ import org.jdom.xpath.XPath;
 
 import ru.mipt.sign.core.exceptions.NextCommandException;
 import ru.mipt.sign.neurons.NeuronConst;
-import ru.mipt.sign.news.INews;
 import ru.mipt.sign.news.News;
 import ru.mipt.sign.util.XmlFormatter;
 
@@ -36,18 +24,18 @@ import com.sun.syndication.io.XmlReader;
 
 public class RSSParser implements NeuronConst
 {
-    private List<INews> news_list = new ArrayList<INews>();
+    private List<News> news_list = new ArrayList<News>();
     private Map <String, String> mapSiteDate = new HashMap(); 
     /* map site , date of latest new*/
     private URL url;
-    private String path = DEFAULT_CONF_PATH + "News" + ".xml";
     private Element newsBaseXml = new Element("AllNews");
     Document doc;
 
-    public RSSParser() throws NextCommandException
+    public RSSParser(String path) throws NextCommandException
     {
         if (!path.isEmpty())
         {
+            path = DEFAULT_CONF_PATH + path + ".xml";
             SAXBuilder builder = new SAXBuilder();
             String data = "";
 
@@ -72,7 +60,6 @@ public class RSSParser implements NeuronConst
             try
             {
                 doc = builder.build(new ByteArrayInputStream(data.getBytes()));
-                // System.out.println(doc);
             } catch (Exception e)
             {
                 e.printStackTrace();
@@ -100,7 +87,6 @@ public class RSSParser implements NeuronConst
                 {
                     Element Site = it.next();
 
-                    // System.out.println(Site.getAttributes());
                     List<Element> res2 = Site.getChildren();
 
                     for (Iterator<Element> it2 = res2.iterator(); it2.hasNext();)
@@ -112,19 +98,6 @@ public class RSSParser implements NeuronConst
                     	News curNew = new News(text,date,source);
                     	
                         news.add(curNew);
-
-                        // System.out.println(it2.next().getChild("text").getAttributeValue("text"));
-                        /*
-                         * List<Element> res3 = it2.next().getChildren(); for
-                         * (Iterator<Element> it3 = res3.iterator();
-                         * it3.hasNext();) { Element tmp2 = it3.next(); //Date
-                         * date2 = new
-                         * SimpleDateFormat().parse(tmp2.getAttribute
-                         * ("date").toString()); //news.add( new
-                         * News(tmp2.getAttribute("text").toString(), date2,
-                         * tmp2.getAttribute("source").toString() ));
-                         * System.out.println(tmp2); }
-                         */
                     }
 
                 }
@@ -158,61 +131,54 @@ public class RSSParser implements NeuronConst
         }
     }
 
-    public List<INews> getNews()
+    public List<News> getNews()
     {
 
         try
         {
-            Update();
+            BufferedReader rssFile = new BufferedReader(new FileReader(DEFAULT_CONF_PATH + "rss.txt"));
+            String rssSite = rssFile.readLine();
+            while (rssSite != null)
+            {
+                Element rssSiteXml = new Element("Site"); // xml
+                rssSiteXml.setAttribute("site", rssSite);
+                URL url = new URL(rssSite);
+                XmlReader reader = null;
+                news_list = new ArrayList<News>();
+                try
+                {
+            
+                    reader = new XmlReader(url);
+                    SyndFeed feed = new SyndFeedInput().build(reader);
+            
+                    for (Iterator<SyndEntry> i = feed.getEntries().iterator(); i.hasNext();)
+                    {
+                        SyndEntry entry = i.next();
+            
+                        String date = entry.getPublishedDate().toString();
+                        String text = entry.getDescription().getValue().replaceAll("\\<.*?\\>", "")
+                                .replaceAll("\\&.*?\\;", "");
+                        News curNew = new News(text, date, rssSite);
+                        rssSiteXml.addContent(curNew.getXml());// xml
+                        news_list.add(curNew);
+                    }
+                }
+                finally
+                {
+                    if (reader != null)
+                        reader.close();
+                }
+                newsBaseXml.addContent(rssSiteXml);
+                rssSite = rssFile.readLine();
+            }
+            rssFile.close();
         } catch (Exception e)
         {
             System.out.println("Error" + e.getMessage());
         }
 
-        List<INews> news = new ArrayList<INews>(news_list);
+        List<News> news = new ArrayList<News>(news_list);
 
         return news;
-    }
-
-    private void Update() throws Exception
-    {
-
-        BufferedReader rssFile = new BufferedReader(new FileReader(DEFAULT_CONF_PATH + "rss.txt"));
-        String rssSite = rssFile.readLine();
-        while (rssSite != null)
-        {
-            Element rssSiteXml = new Element("Site"); // xml
-            rssSiteXml.setAttribute("site", rssSite);
-            URL url = new URL(rssSite);
-            XmlReader reader = null;
-            news_list = new ArrayList<INews>();
-            try
-            {
-
-                reader = new XmlReader(url);
-                SyndFeed feed = new SyndFeedInput().build(reader);
-                // System.out.println("Feed Title: " + feed.getAuthor());
-
-                for (Iterator<SyndEntry> i = feed.getEntries().iterator(); i.hasNext();)
-                {
-                    SyndEntry entry = i.next();
-
-                    String date = entry.getPublishedDate().toString();
-                    String text = entry.getDescription().getValue().replaceAll("\\<.*?\\>", "")
-                            .replaceAll("\\&.*?\\;", "");
-                    News curNew = new News(text, date, rssSite);
-                    rssSiteXml.addContent(curNew.getXml());// xml
-                    news_list.add(curNew);
-                }
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.close();
-            }
-            newsBaseXml.addContent(rssSiteXml);
-            rssSite = rssFile.readLine();
-        }
-        rssFile.close();
     }
 }
