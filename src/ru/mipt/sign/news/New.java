@@ -23,7 +23,7 @@ public class New
 
     
     public New() throws NextCommandException, IOException, ParseException {
-    	RSSParser rsspars = new RSSParser();
+    	RSSParser rsspars = new RSSParser("News");
    	    List<News> newsList = rsspars.LoadText();
    	    newsIt = newsList.iterator();
    	    curNew = newsIt.next();
@@ -47,7 +47,7 @@ public class New
     /*
     public List<Double> extendVectorOfNewToFullBasis(Map<String,Double> VectorOfNew) throws NextCommandException, NeuronNotFound, IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException 
     {
-    	        
+    	            
         Map<String,Double> mergedMap = new HashMap<String, Double>();
         mergedMap.putAll(fullBasis);
         mergedMap.putAll(VectorOfNew);

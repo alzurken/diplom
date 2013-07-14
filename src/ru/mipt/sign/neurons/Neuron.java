@@ -8,6 +8,7 @@ import org.jdom.Element;
 import ru.mipt.sign.core.JSONable;
 import ru.mipt.sign.neurons.functions.ActivationFunction;
 import ru.mipt.sign.neurons.functions.Sigmoid;
+import ru.mipt.sign.neurons.inner.UnitWeights;
 import ru.mipt.sign.neurons.inner.Weights;
 
 import com.google.gson.JsonObject;
@@ -33,7 +34,7 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
     {
         weights.setWeight(input, output, value);
     }
-    
+
     public void setOrder(int order)
     {
         this.order = order;
@@ -68,7 +69,7 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
     {
         return delta.get(index);
     }
-    
+
     public void setDelta(int index, double delta)
     {
         this.delta.put(index, delta);
@@ -157,8 +158,15 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
     public Neuron(JsonObject json)
     {
         id = json.get("id").getAsBigInteger();
-        weights = new Weights(json.get("weights").getAsJsonObject());
         role = json.get("role").getAsInt();
+        if (role == INPUT_ROLE)
+        {
+            weights = new UnitWeights(json.get("weights").getAsJsonObject());
+        }
+        else
+        {
+            weights = new Weights(json.get("weights").getAsJsonObject());
+        }
         order = json.get("order").getAsInt();
         String functionName = json.get("function").getAsString();
         try
@@ -175,7 +183,7 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
             e.printStackTrace();
         }
     }
-    
+
     public Neuron(BigInteger id)
     {
         this.id = id;
@@ -238,7 +246,7 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
                 sum += matrix[j][i] * input.get(j);
             }
             this.sum = sum;
-//            Log.debug("Neuron " + id + " calc sum: " + sum);
+            // Log.debug("Neuron " + id + " calc sum: " + sum);
             sum = function.getValue(sum);
             output.put(i, sum);
         }
@@ -321,7 +329,8 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
 
     public double getDerivative()
     {
-//        Log.debug("Sum: " + sum + " Derivative: " + function.getDerivative(sum));
+        // Log.debug("Sum: " + sum + " Derivative: " +
+        // function.getDerivative(sum));
         return function.getDerivative(function.getValue(sum));
     }
 
@@ -376,11 +385,11 @@ public class Neuron implements Comparable<Neuron>, JSONable, NeuronConst
     {
         return -id.compareTo(neuron.getID());
     }
-    
+
     public JsonObject getJSON()
     {
         JsonObject result = new JsonObject();
-        
+
         result.addProperty("id", id);
         result.add("weights", weights.getJSON());
         result.addProperty("role", role);

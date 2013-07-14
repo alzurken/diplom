@@ -25,15 +25,24 @@ public class Bar
 
     public Bar(String input)
     {
-        String [] temp = input.split(";");
-        this.timestamp = new Date(Long.parseLong(temp[0]));
+        String[] temp = input.split(";");
+        this.timestamp = new Date(Long.parseLong(temp[0]) * 1000);
         open = Double.parseDouble(temp[1]);
         close = Double.parseDouble(temp[2]);
         high = Double.parseDouble(temp[3]);
         low = Double.parseDouble(temp[4]);
+        normalize();
     }
 
-    public Date getTimestamp()
+    private void normalize()
+    {
+        open -= 1;
+        close -= 1;
+        high -= 1;
+        low -= 1;
+    }
+
+    public Date getDate()
     {
         return timestamp;
     }

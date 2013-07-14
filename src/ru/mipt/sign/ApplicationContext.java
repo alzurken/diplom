@@ -6,6 +6,7 @@ import java.util.Timer;
 
 import ru.mipt.sign.facade.NeuroManager;
 import ru.mipt.sign.neurons.NeuroNet;
+import ru.mipt.sign.news.NewsContainer;
 import ru.mipt.sign.ui.gui.MainWindow;
 
 public class ApplicationContext
@@ -18,7 +19,18 @@ public class ApplicationContext
     private static ApplicationContext instance = new ApplicationContext();
     private MainWindow mainWindow;
     private Timer timer = new Timer();
+    private NewsContainer newsContainer;
     
+    public NewsContainer getNewsContainer()
+    {
+        return newsContainer;
+    }
+
+    public void setNewsContainer(NewsContainer newsContainer)
+    {
+        this.newsContainer = newsContainer;
+    }
+
     public static ApplicationContext getInstance()
     {
         return instance;

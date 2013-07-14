@@ -15,7 +15,6 @@ import com.google.gson.JsonObject;
 public class Weights implements JSONable, NeuronConst
 {
     private double[][] weights;
-    // private Map<Key, Double> dweights;
     protected int inNumber;
     protected int outNumber;
     private Neuron parent;
@@ -27,16 +26,17 @@ public class Weights implements JSONable, NeuronConst
         this.parent = neuron;
     }
 
+    protected Weights()
     {
-        // weights = new HashMap<Key, Double>();
-        // dweights = new HashMap<Key, Double>();
+        
     }
-
+    
     public Weights(JsonObject json)
     {
         inNumber = json.get("inNumber").getAsInt();
         outNumber = json.get("outNumber").getAsInt();
         JsonArray array = json.get("weights").getAsJsonArray();
+        weights = new double[inNumber][outNumber];
         for (JsonElement elem : array)
         {
             JsonObject object = (JsonObject) elem;
@@ -133,14 +133,7 @@ public class Weights implements JSONable, NeuronConst
 
     public void changeWeight(int input, int output, double value)
     {
-
-        // Key k = new Key(input, output);
-        // Double previousW = dweights.get(k);
-        // if (previousW == null)
-        // Double previousW = 0d;
-        // double deltaW = value + previousW * alpha;
         weights[input][output] += value;
-        // dweights.put(k, deltaW);
     }
 
     public Double getWeight(int input, int output)
@@ -173,9 +166,6 @@ public class Weights implements JSONable, NeuronConst
             for (int i = min + delta; i < inNumber; i++)
             {
                 weights[i][j - delta] = weights[i][j];
-                // dweights.put(new Key(i, j - delta), weights.get(new Key(i,
-                // j)));
-                // dweights.remove(new Key(i, j));
             }
         }
         inNumber -= delta;
@@ -191,9 +181,6 @@ public class Weights implements JSONable, NeuronConst
             for (int j = min + delta; j < outNumber; j++)
             {
                 weights[i][j - delta] = weights[i][j];
-                // dweights.put(new Key(i, j - delta), weights.get(new Key(i,
-                // j)));
-                // dweights.remove(new Key(i, j));
             }
         }
         outNumber -= delta;
@@ -203,7 +190,6 @@ public class Weights implements JSONable, NeuronConst
     {
         this.inNumber = inNumber;
         weights = new double[inNumber][outNumber];
-        // dweights = new HashMap<Key, Double>();
         for (int i = 0; i < this.inNumber; i++)
         {
             for (int j = 0; j < outNumber; j++)
@@ -217,7 +203,6 @@ public class Weights implements JSONable, NeuronConst
     {
         this.outNumber = outNumber;
         weights = new double[inNumber][outNumber];
-        // dweights = new HashMap<Key, Double>();
         for (int i = 0; i < this.inNumber; i++)
         {
             for (int j = 0; j < this.outNumber; j++)

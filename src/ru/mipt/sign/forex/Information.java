@@ -11,15 +11,15 @@ public class Information
         @Override
         public int compare(Bar b1, Bar b2)
         {
-            return b1.getTimestamp().compareTo(b2.getTimestamp());
+            return b1.getDate().compareTo(b2.getDate());
         }
     });
 
     public Information(String input)
     {
-        String[] strings = input.split("\n\r");
+        String[] strings = input.split("\r\n");
         Integer count = Integer.parseInt(strings[0]);
-        for (int i = 1; i < count + 1; i++)
+        for (int i = 1; i < count; i++)
         {
             bars.add(new Bar(strings[i]));
         }

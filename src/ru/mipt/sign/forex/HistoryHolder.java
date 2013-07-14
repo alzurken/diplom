@@ -1,23 +1,64 @@
 package ru.mipt.sign.forex;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import ru.mipt.sign.core.SortedList;
+import ru.mipt.sign.core.exceptions.NextBarException;
+import ru.mipt.sign.util.comparator.DateComparator;
 
 public class HistoryHolder
 {
     private Map<Date, Bar> bars = new HashMap<Date, Bar>();
-    private SortedList<Date> dates = new SortedList<Date>(new Comparator<Date>()
+    private SortedList<Date> dates = new SortedList<Date>(new DateComparator());
+
+    public HistoryHolder()
     {
-        @Override
-        public int compare(Date d1, Date d2)
+        update();
+    }
+
+    public void update()
+    {
+        Information info = Synchronizer.read();
+        for (Bar bar : info.getBars())
         {
-            return d1.compareTo(d2);
+            Date date = bar.getDate();
+            dates.add(date);
+            bars.put(date, bar);
         }
-    });
+    }
+
+    public Bar getNextBar(Bar bar)
+    {
+
+        return getNextBar(bar, 1);
+    }
+    
+    public Bar getNextBar(Bar bar, int step)
+    {
+
+        int index = dates.indexOf(bar.getDate()) + step;
+        if (index >= dates.size())
+            throw new NextBarException();
+        Date nextDate = dates.get(index);
+        return bars.get(nextDate);
+    }
+
+    public Bar getPrevBar(Bar bar) throws NextBarException
+    {
+
+        int index = dates.indexOf(bar.getDate()) - 1;
+        if (index < 0)
+            throw new NextBarException();
+        Date nextDate = dates.get(index);
+        return bars.get(nextDate);
+    }
+
+    public Bar getFirstBar() throws NextBarException
+    {
+        if (dates.size() == 0)
+            throw new NextBarException();
+        return bars.get(dates.get(0));
+    }
 
     public Bar get(Date date)
     {
@@ -25,8 +66,17 @@ public class HistoryHolder
         {
             return bars.get(date);
         }
-        dates.add(date);
-        Integer index = dates.indexOf(date);
+        List<Date> temp = new ArrayList<Date>(dates);
+        temp.add(date);
+        Collections.sort(temp, new Comparator<Date>()
+        {
+            @Override
+            public int compare(Date d1, Date d2)
+            {
+                return d1.compareTo(d2);
+            }
+        });
+        Integer index = temp.indexOf(date);
         Date leftDate;
         Date rightDate;
         long left = -1, right = -1;
@@ -36,31 +86,35 @@ public class HistoryHolder
         }
         else
         {
-            leftDate = dates.get(index - 1);
+            leftDate = temp.get(index - 1);
             left = Math.abs(leftDate.getTime() - date.getTime());
         }
-        if ((index + 1) > dates.size())
+        if ((index + 1) >= temp.size())
         {
             rightDate = null;
         }
         else
         {
-            rightDate = dates.get(index + 1);
+            rightDate = temp.get(index + 1);
             right = Math.abs(rightDate.getTime() - date.getTime());
         }
         if (left < right)
         {
+            if (leftDate == null)
+                return null;
             return bars.get(leftDate);
         }
         else
         {
+            if (rightDate == null)
+                return null;
             return bars.get(rightDate);
         }
     }
 
     public void add(Bar bar)
     {
-        Date date = bar.getTimestamp();
+        Date date = bar.getDate();
         bars.put(date, bar);
         dates.add(date);
     }

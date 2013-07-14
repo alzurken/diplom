@@ -26,8 +26,10 @@ public class Synchronizer
             return new Information(strContent.toString());
         } catch (Exception e)
         {
-            return null;
+            e.printStackTrace();
         }
+//        file.delete();
+        return null;
     }
     
     public static void write(String out)
@@ -42,7 +44,5 @@ public class Synchronizer
         } catch (IOException e)
         {
         }
-        File in = new File(input);
-        in.delete();
     }
 }

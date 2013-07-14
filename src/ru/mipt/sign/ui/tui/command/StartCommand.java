@@ -18,32 +18,18 @@ public class StartCommand extends Command
     {
         Long numberOfSteps;
         String[] temp = command.split(" ");
+        System.out.println("Processing started");
         if (temp.length == 1)
         {
             numberOfSteps = null;
+            ApplicationContext.getInstance().getManager().start();
         }
         else
         {
             numberOfSteps = Long.valueOf(temp[1]);
+            ApplicationContext.getInstance().getManager().start(numberOfSteps);
         }
-        final Long param = numberOfSteps;
-//        ApplicationContext.getInstance().getTimer().schedule(new TimerTask()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                if (param == null)
-//                {
-//                    ApplicationContext.getInstance().getManager().start();
-//                }
-//                else
-//                {
-//                    System.out.println("Processing stopped");
-//                }
-//            }
-//        }, 0, DELAY);
-        System.out.println("Processing started");
-        ApplicationContext.getInstance().getManager().start(param);
+        System.out.println("Processing stopped");
     }
 
     @Override

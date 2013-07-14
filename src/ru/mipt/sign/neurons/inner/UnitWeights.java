@@ -1,15 +1,24 @@
 package ru.mipt.sign.neurons.inner;
 
-import java.util.Collections;
 import java.util.List;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class UnitWeights extends Weights
 {
     public UnitWeights(Integer inNumber, Integer outNumber)
     {
-        super(inNumber, outNumber);
+        this.inNumber = inNumber;
+        this.outNumber = outNumber;
     }
 
+    public UnitWeights(JsonObject json)
+    {
+        inNumber = json.get("inNumber").getAsInt();
+        outNumber = json.get("outNumber").getAsInt();
+    }
+    
     @Override
     public void addInputs(Integer extraNumber)
     {
@@ -69,5 +78,15 @@ public class UnitWeights extends Weights
     public double initValue()
     {
         throw new RuntimeException();
+    }
+    
+    @Override
+    public JsonObject getJSON()
+    {
+        JsonObject result = new JsonObject();
+        result.addProperty("inNumber", inNumber);
+        result.addProperty("outNumber", outNumber);
+        result.add("weights", new JsonArray());
+        return result;
     }
 }

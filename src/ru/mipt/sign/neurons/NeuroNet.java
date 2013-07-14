@@ -8,6 +8,7 @@ import org.jdom.Element;
 import ru.mipt.sign.core.JSONable;
 import ru.mipt.sign.core.exceptions.CalculationException;
 import ru.mipt.sign.core.exceptions.NeuronNotFound;
+import ru.mipt.sign.forex.Bar;
 import ru.mipt.sign.neurons.data.InputDataProvider;
 import ru.mipt.sign.neurons.factory.NeuronFactory;
 import ru.mipt.sign.neurons.functions.UnitFunction;
@@ -34,6 +35,7 @@ public class NeuroNet implements JSONable, NeuronConst
     protected List<Double> currentInput;
     private Map<BigInteger, List<Connection>> cacheConnectionsForANeuron;
     private Map<BigInteger, List<Connection>> cacheConnectionsForZNeuron;
+    private Bar lastLearned = null;
 
     {
         currentID = BigInteger.valueOf(0);
@@ -46,6 +48,16 @@ public class NeuroNet implements JSONable, NeuronConst
         cacheConnectionsForZNeuron = new HashMap<BigInteger, List<Connection>>();
     }
     
+    public Bar getLastLearned()
+    {
+        return lastLearned;
+    }
+
+    public void setLastLearned(Bar lastLearned)
+    {
+        this.lastLearned = lastLearned;
+    }
+
     private void resetCache()
     {
         cacheConnectionsForANeuron = new HashMap<BigInteger, List<Connection>>();
@@ -319,7 +331,7 @@ public class NeuroNet implements JSONable, NeuronConst
     {
         this.inputNumber = inNumber;
         this.outputNumber = outNumber;
-        for (int i = 0; i < inputNumber; i++)
+        for (int i = 0; i < inNumber; i++)
         {
             BigInteger id = getNextId();
             Neuron inputNeuron = new Neuron(id);
@@ -332,7 +344,7 @@ public class NeuroNet implements JSONable, NeuronConst
                 System.out.println("There is no neuron with id = " + e.getId());
             }
         }
-        for (int i = 0; i < outputNumber; i++)
+        for (int i = 0; i < outNumber; i++)
         {
             Neuron out = new Neuron(LAST_NEURON_ID.add(BigInteger.valueOf(i)));
             neuroPool.put(out.getID(), out);

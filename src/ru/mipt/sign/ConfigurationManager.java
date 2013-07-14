@@ -68,78 +68,49 @@ public class ConfigurationManager implements NeuronConst
 
     public static void init()
     {
-        int inputNumber = INPUT_NUMBER;
-        int firstNumber = 100;
-        int secondNumber = 30;
-        init(inputNumber, 1);
+        int prevNumber = LEARN_WINDOW * 4;
+
+        init(prevNumber, 4);
         ApplicationContext appCtx = ApplicationContext.getInstance();
         NeuroNet nn = appCtx.getNeuroNet();
-        List<BigInteger> inputLayer = nn.getInputNeurons();
-        List<BigInteger> firstLayer = new ArrayList<BigInteger>();
-        List<BigInteger> secondLayer = new ArrayList<BigInteger>();
-        
-        Double average = 0d;
-        for (int i = 0; i < firstNumber; i++)
+        List<BigInteger> prevLayer = nn.getInputNeurons();
+        List<BigInteger> nextLayer = new ArrayList<BigInteger>();
+
+        for (int layerIndex = 0; layerIndex < LAYER_NUMBER.length; layerIndex++)
         {
-            if (i % 10 == 0)
+            int nextNumber = LAYER_NUMBER[layerIndex];
+            for (int i = 0; i < nextNumber; i++)
             {
-                System.out.println(i+"%");
+                BigInteger neuronID = nn.addNeuron();
+                nextLayer.add(neuronID);
+                for (int j = 0; j < prevNumber; j++)
+                {
+                    try
+                    {
+                        nn.connectNeuron(prevLayer.get(j), neuronID, 1);
+                    } catch (NeuronNotFound e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
             }
-            long time = System.currentTimeMillis();
-            BigInteger neuronID = nn.addNeuron();
-            firstLayer.add(neuronID);
-            for (int j = 0; j < inputNumber; j++)
+            prevLayer = nextLayer;
+            nextLayer = new ArrayList<BigInteger>();
+            prevNumber = nextNumber;
+            System.out.println((layerIndex + 1) + " layer created");
+        }
+        for (int i = 0; i < nn.getOutputNumber(); i++)
+        {
+            BigInteger neuronID = LAST_NEURON_ID.add(new BigInteger(Integer.toString(i)));
+            for (int j = 0; j < prevLayer.size(); j++)
             {
                 try
                 {
-                    nn.connectNeuron(inputLayer.get(j), neuronID, 1);
+                    nn.connectNeuron(prevLayer.get(j), neuronID, 1);
                 } catch (NeuronNotFound e)
                 {
                     e.printStackTrace();
                 }
-            }
-            average += System.currentTimeMillis() - time;
-//            System.out.println("" + (i+1) + " neuron added. Time: " + average / (i+1));
-        }
-        System.out.println("100%");
-        System.out.println("Average: " + (average/firstNumber));
-        System.out.println("Time: " + (average));
-        System.out.println("First layer created");
-        average = 0d;
-        for (int i = 0; i < secondNumber; i++)
-        {
-            if (i % 3 == 0)
-            {
-                System.out.println((i/3*10)+"%");
-            }
-            long time = System.currentTimeMillis();
-            BigInteger neuronID = nn.addNeuron();
-            secondLayer.add(neuronID);
-            for (int j = 0; j < firstNumber; j++)
-            {
-                try
-                {
-                    nn.connectNeuron(firstLayer.get(j), neuronID, 1);
-                } catch (NeuronNotFound e)
-                {
-                    e.printStackTrace();
-                }
-            }
-            average += System.currentTimeMillis() - time;
-//            System.out.println("" + (i+1) + " neuron added. Time: " + average / (i+1));
-        }
-        System.out.println("100%");
-        System.out.println("Average: " + (average/secondNumber));
-        System.out.println("Time: " + (average));
-        System.out.println("Second layer created");
-        for (int j = 0; j < secondNumber; j++)
-        {
-            try
-            {
-                nn.connectNeuron(secondLayer.get(j), LAST_NEURON_ID, 1);
-            } catch (NeuronNotFound e)
-            {
-                e.printStackTrace();
             }
         }
         System.out.println("Ready");
@@ -150,7 +121,7 @@ public class ConfigurationManager implements NeuronConst
         ApplicationContext appCtx = ApplicationContext.getInstance();
         appCtx.setOut(System.out);
         NeuroNet nn = new NeuroNet(inNumber, outNumber);
-        
+
         appCtx.setNet(nn);
         appCtx.setManager(new NeuroManager());
     }
